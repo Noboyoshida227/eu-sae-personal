@@ -15,7 +15,7 @@ received can be traced to the exact commit that produced it and rebuilt from it.
    uncommitted, and writes the commit hash into `RELEASE_INFO.txt`. A zip built
    from uncommitted files matches nothing on GitHub and can never be rebuilt.
 3. **One version is built once.** The release folder is
-   `dist\release_<version>\`; if it already exists, the version must change.
+   `dist\<RELEASE_NAME>\`; if it already exists, the version must change.
    Two archives with the same name and different contents cannot be told apart
    by the people who receive them.
 4. **Every version has a CHANGELOG entry.** `Release.ps1` and the test suite
@@ -31,9 +31,9 @@ Edit files at the repository root. Never edit anything under `dist\`.
 cd C:\Users\noboy\Repos\eu-sae-personal
 
 # 1. bump the version everywhere (use --dry-run first to see what it will touch)
-python tools\bump_version.py 5.2.0-rc.6-wizard.5-<short-label>
+python tools\bump_version.py 5.2.0-rc.6-wizard.6 --release-name EU_SAE_5.2.0_w6
 
-# 2. write the CHANGELOG entry under  ## 5.2.0-rc.6-wizard.5-<short-label> - <date>
+# 2. write the CHANGELOG entry under  ## 5.2.0-rc.6-wizard.6 - <date>
 #    (docs\CHANGELOG.md - describe what changed and why)
 
 # 3. commit everything in GitHub Desktop, then push
@@ -50,7 +50,7 @@ git push origin v<version>
 #    tick "pre-release" while the package is a release candidate.
 ```
 
-Send recipients the `.zip` from `dist\release_<version>\` together with its
+Send recipients the `.zip` from `dist\<RELEASE_NAME>\` together with its
 SHA-256 from `SHA256SUMS.txt`.
 
 ## What the build enforces
@@ -59,7 +59,7 @@ SHA-256 from `SHA256SUMS.txt`.
 
 - the working tree has uncommitted changes (use `-AllowDirty` only for a
   private test build — it is labelled *UNCOMMITTED* and must not be sent out);
-- `dist\release_<version>\` already exists;
+- `dist\<RELEASE_NAME>\` already exists;
 - `docs/CHANGELOG.md` has no entry for the version;
 - any file in `scripts/release_inventory.csv` is missing — in particular
   `Data/Spain/survey.rds` and `auxiliary.rds`, which are kept out of the
@@ -88,3 +88,10 @@ building; `Release.ps1` will tell you if they are missing.
 
 **Scratch folders.** `tmp\` and `dist\` are ignored by git and are yours to
 delete. Nothing in them is needed to rebuild a release.
+
+## Short release names
+
+`RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
+The current name is `EU_SAE_5.2.0_w5`; the full version remains in `WIZARD_VERSION`.
+For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
+The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

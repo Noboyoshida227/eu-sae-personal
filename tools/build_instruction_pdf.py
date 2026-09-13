@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WIZARD_VERSION = (ROOT / "WIZARD_VERSION").read_text(encoding="utf-8").strip()
 if not re.fullmatch(r"[A-Za-z0-9._-]+", WIZARD_VERSION):
     raise SystemExit(f"Invalid WIZARD_VERSION: {WIZARD_VERSION!r}")
+RELEASE_NAME = (ROOT / "RELEASE_NAME").read_text(encoding="utf-8").strip()
 VERSION_TOKEN = re.sub(r"[.-]", "_", WIZARD_VERSION)          # 5.2.0-rc.6-x -> 5_2_0_rc_6_x
 OUT = ROOT / "docs" / "instructions" / f"EU_SAE_Download_Instructions_{VERSION_TOKEN}.pdf"
 
@@ -139,7 +140,7 @@ def build_pdf():
         "<b>Release-candidate warning.</b> Public sharing remains blocked until Git history/release assets and institutional rights/authority are remediated. Automatic source archives for superseded releases must not be used. A public URL is intentionally not supplied here.",
     )
     y = draw_section(c, y, 1, "Obtain the correct archive",
-        f"Obtain the curated, history-free wizard ZIP from the authorized release manager. Its top-level folder must be <b>EU_SAE_wizard_{WIZARD_VERSION}</b>. Do not ZIP the source workspace and do not use an automatic repository source archive.")
+        f"Obtain the curated, history-free wizard ZIP from the authorized release manager. Its top-level folder must be <b>{RELEASE_NAME}</b>. Do not ZIP the source workspace and do not use an automatic repository source archive.")
     y = draw_section(c, y, 2, "Verify the package",
         f"Open <b>VERSION</b> and confirm 5.2.0-rc.6; open <b>WIZARD_VERSION</b> and confirm {WIZARD_VERSION}. From the extracted package root, run <b>Rscript scripts/verify_release.R</b> to check the full file set and SHA-256 hashes. Compare the ZIP hash with <b>SHA256SUMS.txt</b>. Stop if a listed file is missing or changed, or if an unexpected file is present.")
     y = draw_section(c, y, 3, "Check the expected contents",

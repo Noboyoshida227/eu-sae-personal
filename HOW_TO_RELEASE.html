@@ -476,7 +476,7 @@ title bar, the launchers, the tests, several notes, the text inside the
 slide deck and the guidelines note, and the <em>file names</em> of the
 two instruction documents. This program changes all of them in one go
 and regenerates the download-instructions PDF.</p>
-<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece</code></pre>
+<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_5.2.0_w6</code></pre>
 <p>The last part is the new version. Keep the pattern
 <code>5.2.0-rc.6-wizard.N-label</code>: increase <code>N</code> by one
 each release, and choose any short label (no spaces) that reminds you
@@ -497,7 +497,7 @@ wrong:</p>
 <li><code>docs\CHANGELOG.md</code> has a note for this version;</li>
 <li>every file that should ship is present.</li>
 </ol>
-<p>Then it creates <code>dist\release_&lt;version&gt;\</code> containing
+<p>Then it creates <code>dist\&lt;RELEASE_NAME&gt;\</code> containing
 the package copy, the zip, a checksum file, and
 <code>RELEASE_INFO.txt</code> naming the commit it was built from. About
 a minute.</p>
@@ -510,7 +510,7 @@ a minute.</p>
 <p><strong>1. Edit.</strong> Change whatever you need in the package
 folder. Save.</p>
 <p><strong>2. Stamp the new version.</strong></p>
-<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece</code></pre>
+<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_5.2.0_w6</code></pre>
 <p><strong>3. Write down what changed.</strong> Open
 <code>docs\CHANGELOG.md</code> in any text editor and add a short
 section at the very top, under a heading that matches the version you
@@ -525,7 +525,7 @@ main</strong>, then <strong>Push origin</strong>.</p>
 <p><strong>5. Build.</strong></p>
 <pre class="powershell"><code>powershell -ExecutionPolicy Bypass -File .\Release.ps1</code></pre>
 <p>When it finishes, the zip is in
-<code>dist\release_5.2.0-rc.6-wizard.5-greece\</code>.</p>
+<code>dist\EU_SAE_5.2.0_w6\</code>.</p>
 <p><strong>Then publish.</strong> On GitHub: <strong>Releases → Draft a
 new release</strong>. In <em>Choose a tag</em> type
 <code>v5.2.0-rc.6-wizard.5-greece</code> and click <em>Create new tag on

@@ -1,3 +1,12 @@
+# Short, portable name shared by the package folder and distributable ZIP.
+sae_release_name <- function(root = ".") {
+  name <- trimws(readLines(file.path(root, "RELEASE_NAME"), warn = FALSE)[1L])
+  if (is.na(name) || !grepl("^EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}$", name)) {
+    stop("Invalid RELEASE_NAME: use EU_SAE_ followed by up to 32 filename-safe characters.")
+  }
+  name
+}
+
 # Shared release inventory, manifest and verification implementation.
 sae_release_inventory <- function(root = ".") {
   inventory <- utils::read.csv(file.path(root, "scripts", "release_inventory.csv"),
@@ -9,7 +18,7 @@ sae_release_inventory <- function(root = ".") {
   }
   forbidden <- "(^|/)(\\.git|\\.env[^/]*|\\.Renviron|\\.Rhistory|\\.RData|Rplots\\.pdf|app_runs|r_local_library|node_modules|renv|tmp|dist|secrets\\.yml|api_keys\\.yml|package_versions\\.local\\.csv)(/|$)|^docs/internal/|^outputs/(?!.*\\.gitkeep$)|^docs/guidance/literature/(?!README\\.md$)"
   if (any(grepl(forbidden, paths, perl = TRUE, ignore.case = TRUE))) stop("Forbidden file in release inventory.")
-  required <- c("VERSION", "WIZARD_VERSION", "app.R", "app_wizard.R", "report.Rmd",
+  required <- c("VERSION", "WIZARD_VERSION", "RELEASE_NAME", "app.R", "app_wizard.R", "report.Rmd",
                 "README.md", "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md",
                 "docs/MCPE_VALIDATION_STATUS.md", "docs/SUPPORTED_PLATFORMS.md",
                 "Data/README.md", "scripts/release_inventory.csv")

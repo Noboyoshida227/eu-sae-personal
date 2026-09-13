@@ -31,8 +31,8 @@ Ports advance if occupied. There is no supplied wizard shell launcher; manual
 launch through R remains possible from the package root using
 `source("app_wizard.R")` after installing dependencies.
 
-- [Download and verification instructions](docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_4_crossplatform.pdf)
-- [Wizard reference](docs/README_WIZARD.md) and [slide guide](docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_4_crossplatform.pptx)
+- [Download and verification instructions](docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5.pdf)
+- [Wizard reference](docs/README_WIZARD.md) and [slide guide](docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5.pptx)
 - [Methodological guidance](docs/guidance/guidelines_v5_2_0_rc6_wizard.docx)
 - [Examples and your own input folders](Data/README.md)
 
@@ -149,7 +149,7 @@ The authoritative builder includes only `scripts/release_inventory.csv` and
 excludes internal notes, arbitrary user Data folders, local libraries,
 credentials, run histories, generated outputs and non-inventory literature.
 It creates fresh staging, a manifest, a ZIP and `SHA256SUMS.txt` under
-`dist/reorganized_candidate/`; an existing destination is never overwritten.
+`dist/reorganized_candidate/` when called directly; an existing destination is never overwritten.
 The ZIP contains one package folder with unchanged version identifiers.
 Run `Rscript scripts/verify_release.R` from an extracted clean package to
 verify both its full file set and hashes. Passing verification is not public
@@ -180,3 +180,10 @@ consistent with temporal borrowing and shrinkage, but does not prove greater
 accuracy or a statistically significant variance reduction. Use the separate
 CI-width figures, MSE/MCPE diagnostics, and model sensitivity checks to assess
 uncertainty. See Section 11.9 of the guidance note.
+
+### Short release packages
+
+Run `Release.ps1` from a clean, committed source folder to create
+`dist/EU_SAE_5.2.0_w5/EU_SAE_5.2.0_w5.zip` and its matching application folder.
+`RELEASE_NAME` controls these short names; `WIZARD_VERSION` retains the full version.
+Use `tools/bump_version.py <new-version> --release-name <new-short-name>` for later releases.

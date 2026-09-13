@@ -5,7 +5,7 @@
     one that could not be reproduced or told apart later.
 
 .DESCRIPTION
-    Creates  dist\release_<WIZARD_VERSION>\  containing the complete package
+    Creates  dist\<RELEASE_NAME>\  containing the complete package
     folder, the distributable ZIP, its SHA-256, a RELEASE_INFO.txt that names
     the exact git commit, and the builder's own re-extraction check.
 
@@ -15,7 +15,7 @@
          from uncommitted files matches no commit on GitHub and cannot be
          rebuilt. Use -AllowDirty only for a private test build; it is
          labelled as such and must not be distributed.
-      2. dist\release_<version>\ does not already exist. One version is
+      2. dist\<RELEASE_NAME>\ does not already exist. One version is
          built once. To build again, change the version
          (python tools\bump_version.py <new>) or remove that folder if it was
          never sent to anyone.
@@ -41,7 +41,7 @@ function Write-Bad  { param($m) Write-Host "   $m" -ForegroundColor Red }
 function Write-Warn { param($m) Write-Host "   $m" -ForegroundColor Yellow }
 
 Set-Location -LiteralPath $PSScriptRoot
-foreach ($required in @('scripts\build_clean_release.R', 'WIZARD_VERSION', 'docs\CHANGELOG.md')) {
+foreach ($required in @('scripts\build_clean_release.R', 'WIZARD_VERSION', 'RELEASE_NAME', 'docs\CHANGELOG.md')) {
     if (-not (Test-Path -LiteralPath $required)) { Write-Bad "Cannot find $required - run this from the package root."; exit 1 }
 }
 $version = (Get-Content -LiteralPath 'WIZARD_VERSION' -Raw).Trim()
@@ -86,7 +86,11 @@ if ($git) {
 }
 
 # ---- 2. one version, built once ------------------------------------------
-$target = Join-Path 'dist' "release_$version"
+$packageName = (Get-Content -LiteralPath 'RELEASE_NAME' -Raw).Trim()
+if ($packageName -cnotmatch '^EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}$') {
+    Write-Bad "Invalid RELEASE_NAME."; exit 1
+}
+$target = Join-Path 'dist' $packageName
 if (Test-Path -LiteralPath $target) {
     Write-Bad "$target already exists."
     Write-Bad "A version is built once. Either change the version:"
@@ -152,10 +156,10 @@ if ($buildExit -ne 0) { Write-Step "BUILD FAILED"; Write-Bad "The builder exited
 # ---- confirm the folder holds a package AND a zip AND executable launchers -
 Write-Step "Checking the release folder"
 $logText = ($log | Out-String)
-$pkgDir  = Get-ChildItem -LiteralPath $target -Directory | Where-Object { $_.Name -like 'EU_SAE_wizard_*' } | Select-Object -First 1
+$pkgDir  = Get-ChildItem -LiteralPath $target -Directory | Where-Object { $_.Name -eq $packageName } | Select-Object -First 1
 $zip     = Get-ChildItem -LiteralPath $target -Filter '*.zip' | Select-Object -First 1
 $problems = @()
-if (-not $pkgDir) { $problems += "No EU_SAE_wizard_* package folder was created." }
+if (-not $pkgDir) { $problems += "No matching package folder was created." }
 if (-not $zip)    { $problems += "No .zip archive was created." }
 if ($logText -notmatch 'Marked executable in archive') { $problems += "The macOS/Linux launchers were NOT marked executable in the archive." }
 if ($problems.Count) {

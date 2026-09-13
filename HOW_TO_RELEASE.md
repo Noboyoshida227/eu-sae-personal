@@ -69,7 +69,7 @@ This program changes all of them in one go and regenerates the
 download-instructions PDF.
 
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece
+python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_5.2.0_w6
 ```
 
 The last part is the new version. Keep the pattern `5.2.0-rc.6-wizard.N-label`:
@@ -92,7 +92,7 @@ It first checks four things and stops with a plain message if any is wrong:
 3. `docs\CHANGELOG.md` has a note for this version;
 4. every file that should ship is present.
 
-Then it creates `dist\release_<version>\` containing the package copy, the zip,
+Then it creates `dist\<RELEASE_NAME>\` containing the package copy, the zip,
 a checksum file, and `RELEASE_INFO.txt` naming the commit it was built from.
 About a minute.
 
@@ -106,7 +106,7 @@ Every release is the same five moves.
 
 **2. Stamp the new version.**
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece
+python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_5.2.0_w6
 ```
 
 **3. Write down what changed.** Open `docs\CHANGELOG.md` in any text editor
@@ -126,7 +126,7 @@ Write a one-line summary, click **Commit to main**, then **Push origin**.
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\Release.ps1
 ```
-When it finishes, the zip is in `dist\release_5.2.0-rc.6-wizard.5-greece\`.
+When it finishes, the zip is in `dist\EU_SAE_5.2.0_w6\`.
 
 **Then publish.** On GitHub: **Releases → Draft a new release**. In *Choose a
 tag* type `v5.2.0-rc.6-wizard.5-greece` and click *Create new tag on publish*.
@@ -175,3 +175,10 @@ window.
 - Never edit anything inside `dist\`. Edit the package folder and build again.
 - Never rebuild a version that has already been sent to someone. Stamp a new
   one.
+
+## Short release names
+
+`RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
+The current name is `EU_SAE_5.2.0_w5`; the full version remains in `WIZARD_VERSION`.
+For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
+The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

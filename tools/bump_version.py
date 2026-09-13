@@ -87,6 +87,7 @@ def patch_office_zip(path, part_pattern, old, new, dry):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("new_version")
+    ap.add_argument("--release-name", help="Short package/ZIP name, e.g. EU_SAE_5.2.0_w6")
     ap.add_argument("--dry-run", action="store_true", help="report what would change, touch nothing")
     ap.add_argument("--skip-pdf", action="store_true", help="do not regenerate the PDF (reportlab absent here)")
     a = ap.parse_args()
@@ -95,6 +96,11 @@ def main():
     new = a.new_version.strip()
     if not re.fullmatch(r"[A-Za-z0-9._-]+", new): die(f"invalid version {new!r} (letters, digits, . _ - only)")
     if new == old: die(f"WIZARD_VERSION is already {old}")
+    short_name = a.release_name or ("EU_SAE_" + new)
+    if not re.fullmatch(r"EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}", short_name):
+        die("Supply a shorter --release-name (EU_SAE_ plus up to 32 filename-safe characters).")
+    if (ROOT / "dist" / short_name).exists():
+        die(f"Release folder already exists: dist/{short_name}")
     old_tok, new_tok = token(old), token(new)
     dry = a.dry_run
     say(f"{'DRY RUN - ' if dry else ''}{old}  ->  {new}")
@@ -113,6 +119,10 @@ def main():
         if Path(pat.format(tok=new_tok)).exists(): die(f"target already exists: {pat.format(tok=new_tok)}")
     for pat, _ in OFFICE_TARGETS:
         if not Path(pat.format(tok=old_tok)).exists(): die(f"expected file not found: {pat.format(tok=old_tok)}")
+
+    say(f"Release folder and ZIP: {short_name}")
+    if not dry:
+        (ROOT / "RELEASE_NAME").write_text(short_name + "\n", encoding="utf-8")
 
     # ---- 1 + 2. text files ------------------------------------------------
     say("Text files:")
@@ -174,7 +184,7 @@ def main():
     if not dry:
         say(f"  1. Add an entry to docs/CHANGELOG.md under:   ## {new} - <date>")
         say(f"  2. Review the changes in GitHub Desktop and commit.")
-        say(f"  3. Run Release.ps1 - it builds dist\\release_{new}\\")
+        say(f"  3. Run Release.ps1 - it builds dist\\{short_name}\\")
 
 if __name__ == "__main__":
     main()

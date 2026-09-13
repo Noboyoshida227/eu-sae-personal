@@ -25,7 +25,7 @@ hashes <- vapply(file.path(root, paths), sae_sha256_file, character(1))
 if (anyNA(hashes)) stop("Source hashing failed.")
 wizard_version <- trimws(readLines("WIZARD_VERSION", warn = FALSE)[1L])
 if (!grepl("^[A-Za-z0-9._-]+$", wizard_version)) stop("Invalid WIZARD_VERSION.")
-package_name <- paste0("EU_SAE_wizard_", wizard_version)
+package_name <- sae_release_name(root)
 stage <- file.path(target, package_name)
 dir.create(stage, recursive = TRUE, showWarnings = FALSE)
 for (path in paths) {
@@ -49,7 +49,7 @@ writeLines(c(
 ), file.path(stage, "docs", "CLEAN_RELEASE_NOTICE.txt"), useBytes = TRUE)
 sae_write_release_manifest(stage)
 sae_verify_release(stage)
-archive <- file.path(target, paste0(package_name, "_reports_candidate.zip"))
+archive <- file.path(target, paste0(package_name, ".zip"))
 zip::zipr(archive, files = package_name, root = target, include_directories = TRUE)
 # A ZIP written on Windows records no Unix permission bits, so the macOS/Linux
 # launchers would extract without the executable flag and Finder would refuse to

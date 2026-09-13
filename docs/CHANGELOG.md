@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5 - 2026-09-12
+
+- Shortened the distributable ZIP to `EU_SAE_5.2.0_w5.zip` and the application
+  folder to `EU_SAE_5.2.0_w5`. Local releases now live under `dist/<RELEASE_NAME>/`.
+- Added a validated `RELEASE_NAME` file, included in the release manifest, and
+  a `--release-name` option for future version bumps. Full version identifiers
+  and source commit metadata remain available for reproducibility.
+- Updated the download instructions and release documentation for short names.
+- Packaging-only release: no changes to statistical estimation or analysis settings.
+
 ## 5.2.0-rc.6-wizard.4-crossplatform - 2026-09-01
 
 - Added macOS/Linux launchers `Start_Here/Start_Wizard.command` and
