@@ -88,3 +88,6 @@ release_candidate_*/
 
 # Internal review material lives in OneDrive, never in this public repository.
 docs/internal/
+
+# Local launcher dependency diagnostics
+startup_setup.log

@@ -136,14 +136,18 @@ REM    non-interactive launcher, which prefers port 7788 and automatically
 REM    falls back to the next free local port. Calling source('app_wizard.R') instead
 REM    of shiny::runApp(appDir=...) avoids a double-runApp nesting that
 REM    breaks static asset serving (www/eu_poverty_map.png and friends).
-"%RSCRIPT%" -e "if (file.exists('install_packages.R')) source('install_packages.R'); source('app_wizard.R')"
+echo Checking R packages and Pandoc. First-time downloads may take several minutes.
+echo Setup details are saved in startup_setup.log in the package folder.
+"%RSCRIPT%" -e "local({con <- file('startup_setup.log', open='wt'); sink(con, split=TRUE); sink(con, type='message'); on.exit({sink(type='message'); sink(); close(con)}); source('install_packages.R')}); source('app_wizard.R')"
 set "APP_EXIT=%ERRORLEVEL%"
 
 REM Pause only if R exited with an error so the user can read the message
 if not "%APP_EXIT%"=="0" (
   echo.
   echo --------------------------------------------
-  echo The dashboard exited with an error.
+  echo Setup or dashboard startup failed.
+  echo Please send startup_setup.log from the package folder for troubleshooting.
+  if exist "startup_setup.log" type "startup_setup.log"
   echo --------------------------------------------
   pause
 )

@@ -8,12 +8,16 @@
 # ============================================================
 
 cat("=== EU SAE Shiny App - Package Installer ===\n\n")
+options(timeout = max(600, getOption("timeout", 60)))
+cat("R:", R.version.string, "\n")
 
 .user_lib <- Sys.getenv("R_LIBS_USER", unset = "")
 if (nzchar(.user_lib)) {
   dir.create(.user_lib, recursive = TRUE, showWarnings = FALSE)
   .libPaths(unique(c(.user_lib, .libPaths())))
 }
+
+cat("R libraries:", paste(.libPaths(), collapse = "; "), "\n")
 
 # --- R version check ----------------------------------------
 # Current CRAN dependencies used by the pipeline (notably emdi)
@@ -51,11 +55,13 @@ install_if_missing_or_old <- function(pkg, min_version = NA_character_,
 
   if (!installed) {
     cat("  Installing:", pkg, "\n")
-    install.packages(pkg, repos = repos, lib = .libPaths()[1], quiet = TRUE)
+    install.packages(pkg, repos = repos, lib = .libPaths()[1], quiet = FALSE,
+                     type = if (.Platform$OS.type == "windows") "binary" else getOption("pkgType"))
   } else if (too_old) {
     cat("  Updating:", pkg, "(installed", current_version,
         "< required", min_version, ")\n")
-    install.packages(pkg, repos = repos, lib = .libPaths()[1], quiet = TRUE)
+    install.packages(pkg, repos = repos, lib = .libPaths()[1], quiet = FALSE,
+                     type = if (.Platform$OS.type == "windows") "binary" else getOption("pkgType"))
   } else if (has_min) {
     cat("  OK:", pkg, current_version, "(minimum", min_version, ")\n")
   } else {
@@ -141,40 +147,80 @@ for (pkg in cran_packages) {
   } else {
     NA_character_
   }
-  install_if_missing_or_old(pkg, min_version)
+  tryCatch(install_if_missing_or_old(pkg, min_version), error = function(e) {
+    cat("  Installation error for", pkg, ":", conditionMessage(e), "\n")
+  })
 }
 
-# --- 2. Optional Quarto CLI check ---------------------------
-cat("\n[2/3] Checking optional Quarto support...\n")
-
-quarto_path <- if (requireNamespace("quarto", quietly = TRUE)) {
-  tryCatch(quarto::quarto_path(), error = function(e) "")
-} else {
-  ""
+# Pandoc is a separate executable, not just an R package.
+ensure_report_pandoc <- function() {
+  use_dir <- function(path) {
+    if (!length(path) || is.na(path) || !nzchar(path)) return(FALSE)
+    exe <- file.path(path, if (.Platform$OS.type == "windows") "pandoc.exe" else "pandoc")
+    if (!file.exists(exe)) return(FALSE)
+    info <- tryCatch(rmarkdown::find_pandoc(cache = FALSE, dir = path),
+                     error = function(e) NULL)
+    if (is.null(info) || info$version < numeric_version("2.8")) return(FALSE)
+    Sys.setenv(RSTUDIO_PANDOC = path)
+    rmarkdown::find_pandoc(cache = FALSE)
+    cat("  OK: Pandoc", as.character(info$version), "at", path, "\n")
+    TRUE
+  }
+  current <- rmarkdown::find_pandoc(cache = FALSE)
+  if (current$version >= numeric_version("2.8") && use_dir(current$dir)) return(invisible(TRUE))
+  candidates <- c(
+    file.path(Sys.getenv("ProgramFiles"), "RStudio/resources/app/bin/quarto/bin/tools"),
+    file.path(Sys.getenv("ProgramFiles"), "RStudio/bin/pandoc"),
+    file.path(Sys.getenv("LOCALAPPDATA"), "Programs/RStudio/resources/app/bin/quarto/bin/tools"),
+    file.path(Sys.getenv("LOCALAPPDATA"), "Pandoc"),
+    file.path(Sys.getenv("ProgramFiles"), "Pandoc"),
+    file.path(Sys.getenv("ProgramFiles"), "Quarto/bin/tools"),
+    "/Applications/RStudio.app/Contents/Resources/app/bin/quarto/bin/tools",
+    "/usr/lib/rstudio/resources/app/bin/quarto/bin/tools")
+  for (path in candidates) if (use_dir(path)) return(invisible(TRUE))
+  # The CRAN pandoc package manages official Pandoc binaries in user storage.
+  if (!requireNamespace("pandoc", quietly = TRUE)) {
+    install.packages("pandoc", repos = "https://cloud.r-project.org",
+                     lib = .libPaths()[1], quiet = FALSE,
+                     type = if (.Platform$OS.type == "windows") "binary" else getOption("pkgType"))
+  }
+  if (!requireNamespace("pandoc", quietly = TRUE)) stop("Could not install the Pandoc installer R package.")
+  installed <- pandoc::pandoc_installed_latest()
+  if (length(installed) && !is.na(installed)) {
+    path <- dirname(pandoc::pandoc_bin(installed))
+    if (use_dir(path)) return(invisible(TRUE))
+  }
+  cat("  Installing official Pandoc binary for the current user...\n")
+  pandoc::pandoc_install()
+  path <- dirname(pandoc::pandoc_bin(pandoc::pandoc_installed_latest()))
+  if (!use_dir(path)) stop("Pandoc was downloaded but could not be run, or is older than 2.8.")
+  invisible(TRUE)
 }
 
-quarto_path <- if (is.character(quarto_path) && length(quarto_path) > 0) {
-  unname(quarto_path[[1]])
-} else {
-  ""
-}
-
-if (nzchar(quarto_path)) {
-  cat("  Optional Quarto CLI found:", quarto_path, "\n")
-} else {
-  cat("  Optional Quarto CLI not found. This dashboard uses rmarkdown for reports, so Quarto is not required.\n")
-}
+cat("\n[2/3] Checking required Pandoc report support...\n")
+pandoc_error <- tryCatch({ensure_report_pandoc(); NULL}, error = function(e) conditionMessage(e))
+if (!is.null(pandoc_error)) cat("  Pandoc setup failed:", pandoc_error, "\n")
 
 # --- 3. Verify all packages load ---------------------------
 cat("\n[3/3] Verifying all packages can be loaded...\n")
 
 failed <- character()
 for (pkg in cran_packages) {
-  ok <- requireNamespace(pkg, quietly = TRUE)
-  if (!ok) failed <- c(failed, pkg)
+  issue <- tryCatch({
+    loadNamespace(pkg)
+    if (pkg %in% names(minimum_versions) &&
+        utils::packageVersion(pkg) < numeric_version(minimum_versions[[pkg]])) {
+      stop("Installed version is below the required minimum.")
+    }
+    NULL
+  }, error = function(e) conditionMessage(e))
+  if (!is.null(issue)) {
+    failed <- c(failed, pkg)
+    cat("  Cannot use", pkg, ":", issue, "\n")
+  }
 }
 
-if (length(failed) == 0) {
+if (length(failed) == 0 && is.null(pandoc_error)) {
   package_versions <- data.frame(
     package = cran_packages,
     version = vapply(cran_packages, function(pkg) {
@@ -193,5 +239,6 @@ if (length(failed) == 0) {
 } else {
   cat("\n  WARNING: The following packages could not be loaded:\n")
   cat("    ", paste(failed, collapse = ", "), "\n")
-  cat("  Please install them manually and try again.\n\n")
+  if (!is.null(pandoc_error)) cat("  Pandoc:", pandoc_error, "\n")
+  stop("Setup incomplete. Dashboard was not started. See startup_setup.log (or this console). Resolve download, installation or loading errors and run the launcher again.", call. = FALSE)
 }
