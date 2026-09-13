@@ -176,7 +176,11 @@ ensure_report_pandoc <- function() {
     file.path(Sys.getenv("ProgramFiles"), "Pandoc"),
     file.path(Sys.getenv("ProgramFiles"), "Quarto/bin/tools"),
     "/Applications/RStudio.app/Contents/Resources/app/bin/quarto/bin/tools",
-    "/usr/lib/rstudio/resources/app/bin/quarto/bin/tools")
+    "/usr/lib/rstudio/resources/app/bin/quarto/bin/tools",
+    # macOS / Linux: pandoc.org .pkg installer, Homebrew, MacPorts, ~/opt/pandoc.
+    # A double-clicked .command has a minimal PATH, so look here explicitly.
+    "/usr/local/bin", "/opt/homebrew/bin", "/opt/local/bin", "/opt/pandoc",
+    path.expand("~/opt/pandoc"), "/usr/bin")
   for (path in candidates) if (use_dir(path)) return(invisible(TRUE))
   # The CRAN pandoc package manages official Pandoc binaries in user storage.
   if (!requireNamespace("pandoc", quietly = TRUE)) {
@@ -197,9 +201,16 @@ ensure_report_pandoc <- function() {
   invisible(TRUE)
 }
 
-cat("\n[2/3] Checking required Pandoc report support...\n")
+cat("\n[2/3] Checking Pandoc (needed only for report export)...\n")
 pandoc_error <- tryCatch({ensure_report_pandoc(); NULL}, error = function(e) conditionMessage(e))
-if (!is.null(pandoc_error)) cat("  Pandoc setup failed:", pandoc_error, "\n")
+if (!is.null(pandoc_error)) {
+  cat("  Pandoc setup failed:", pandoc_error, "\n")
+  cat("  This does not prevent startup if the R-package checks below pass.\n")
+  cat("  Analysis can run, but final Word/HTML reports cannot be generated without Pandoc.\n")
+  cat("  A run that attempts report generation may still be marked failed at that stage.\n")
+  cat("  Install Pandoc from https://pandoc.org/installing.html and restart the launcher.\n")
+  cat("  Windows: use the .msi installer. macOS: use the .pkg installer.\n")
+}
 
 # --- 3. Verify all packages load ---------------------------
 cat("\n[3/3] Verifying all packages can be loaded...\n")
@@ -220,7 +231,7 @@ for (pkg in cran_packages) {
   }
 }
 
-if (length(failed) == 0 && is.null(pandoc_error)) {
+if (length(failed) == 0) {
   package_versions <- data.frame(
     package = cran_packages,
     version = vapply(cran_packages, function(pkg) {
@@ -233,12 +244,12 @@ if (length(failed) == 0 && is.null(pandoc_error)) {
   )
   utils::write.csv(package_versions, local_version_report, row.names = FALSE)
   cat("\n  All packages installed successfully.\n")
+  if (!is.null(pandoc_error)) cat("  NOTE: Pandoc setup is incomplete; final report generation requires Pandoc.\n")
   cat("  Package versions recorded locally in ", local_version_report, ".\n", sep = "")
   cat("  This local report is for troubleshooting only and is ignored by Git.\n")
   cat("  You can now run the app with:  shiny::runApp('app.R')\n\n")
 } else {
   cat("\n  WARNING: The following packages could not be loaded:\n")
   cat("    ", paste(failed, collapse = ", "), "\n")
-  if (!is.null(pandoc_error)) cat("  Pandoc:", pandoc_error, "\n")
   stop("Setup incomplete. Dashboard was not started. See startup_setup.log (or this console). Resolve download, installation or loading errors and run the launcher again.", call. = FALSE)
 }

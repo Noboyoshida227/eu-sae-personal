@@ -17,7 +17,8 @@ run_case <- function(mode) {
     numeric_version("99.0.0")
   }
   e$install.packages <- function(pkgs, ...) {
-    stopifnot(list(...)$type == "binary")
+    expected_type <- if (.Platform$OS.type == "windows") "binary" else getOption("pkgType")
+    stopifnot(list(...)$type == expected_type)
     e$downloads <- c(e$downloads, pkgs)
     if (mode == "download_failure" && pkgs == "arrow") stop("Network download failed")
   }
@@ -30,6 +31,9 @@ run_case <- function(mode) {
   e$test_write <- function(...) invisible(NULL)
   e$file.exists <- function(...) TRUE
   e$test_find <- function(cache=FALSE, dir=NULL) {
+    if (mode %in% c("mac_pkg", "mac_homebrew") &&
+        identical(dir, if (mode == "mac_pkg") "/usr/local/bin" else "/opt/homebrew/bin"))
+      return(list(version=numeric_version("3.6"), dir=dir))
     if (e$pandoc_downloads || mode == "existing") list(version=numeric_version("3.6"), dir=tempdir())
     else list(version=numeric_version("0"), dir=NULL)
   }
@@ -37,15 +41,19 @@ run_case <- function(mode) {
   e$test_bin <- function(...) file.path(tempdir(), "pandoc.exe")
   e$test_install_pandoc <- function(...) {
     if (mode == "pandoc_failure") stop("Pandoc download blocked")
+    if (mode == "missing_helper") stop('could not find function "check_string"')
     e$pandoc_downloads <- e$pandoc_downloads+1L
   }
   err <- tryCatch({eval(parse(text=code),e);NULL}, error=conditionMessage)
-  expected_fail <- mode %in% c("download_failure","dll_block","pandoc_failure")
+  expected_fail <- mode %in% c("download_failure","dll_block")
   stopifnot(!is.null(err) == expected_fail, "arrow" %in% e$downloads)
   if (expected_fail) stopifnot(grepl("Setup incomplete",err))
   if (mode == "existing") stopifnot(e$pandoc_downloads == 0L)
+  if (mode %in% c("mac_pkg", "mac_homebrew")) stopifnot(e$pandoc_downloads == 0L)
+  if (mode %in% c("pandoc_failure", "missing_helper")) stopifnot(!is.null(e$pandoc_error))
   if (mode == "missing") stopifnot(e$pandoc_downloads == 1L)
   cat("PASS:",mode,"\n")
 }
-for (mode in c("existing","missing","download_failure","dll_block","pandoc_failure")) run_case(mode)
+for (mode in c("existing","missing","download_failure","dll_block","pandoc_failure",
+               "missing_helper","mac_pkg","mac_homebrew")) run_case(mode)
 
