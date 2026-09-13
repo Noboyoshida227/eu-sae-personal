@@ -85,7 +85,6 @@ docs/report_reference.docx
 install_packages.R
 outputs/.gitkeep
 outputs/data/.gitkeep
-outputs/figures/.gitkeep
 outputs/tables/.gitkeep
 report.Rmd
 scripts/01_ufh.R
