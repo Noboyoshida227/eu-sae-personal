@@ -69,7 +69,7 @@ This program changes all of them in one go and regenerates the
 download-instructions PDF.
 
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5.2-greece --release-name EU_SAE_520_w6
+python tools\bump_version.py 5.2.0-rc.6-wizard.5.3-greece --release-name EU_SAE_520_w6
 ```
 
 The last part is the new version. Keep the pattern `5.2.0-rc.6-wizard.N-label`:
@@ -106,14 +106,14 @@ Every release is the same five moves.
 
 **2. Stamp the new version.**
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5.2-greece --release-name EU_SAE_520_w6
+python tools\bump_version.py 5.2.0-rc.6-wizard.5.3-greece --release-name EU_SAE_520_w6
 ```
 
 **3. Write down what changed.** Open `docs\CHANGELOG.md` in any text editor
 and add a short section at the very top, under a heading that matches the
 version you just stamped:
 ```
-## 5.2.0-rc.6-wizard.5.2-greece - 2026-09-10
+## 5.2.0-rc.6-wizard.5.3-greece - 2026-09-10
 
 - What you changed, and why, in a few lines. Write it for your colleagues;
   you will paste it into the GitHub release page.
@@ -129,7 +129,7 @@ powershell -ExecutionPolicy Bypass -File .\Release.ps1
 When it finishes, the zip is in `dist\EU_SAE_520_w6\`.
 
 **Then publish.** On GitHub: **Releases → Draft a new release**. In *Choose a
-tag* type `v5.2.0-rc.6-wizard.5.2-greece` and click *Create new tag on publish*.
+tag* type `v5.2.0-rc.6-wizard.5.3-greece` and click *Create new tag on publish*.
 Paste your CHANGELOG section as the description, add the SHA-256 from
 `SHA256SUMS.txt`, attach the zip, tick *pre-release*, publish. Send colleagues
 the link.
@@ -179,6 +179,6 @@ window.
 ## Short release names
 
 `RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
-The current name is `EU_SAE_520_w5b`; the full version remains in `WIZARD_VERSION`.
+The current name is `EU_SAE_520_w5c`; the full version remains in `WIZARD_VERSION`.
 For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
 The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

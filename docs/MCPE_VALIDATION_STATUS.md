@@ -1,7 +1,7 @@
 # MCPE bootstrap validation status
 
 Date: 2026-08-24, updated 2026-09-01  
-Build: 5.2.0-rc.6-wizard.5.2
+Build: 5.2.0-rc.6-wizard.5.3
 
 ## Purpose and provenance
 

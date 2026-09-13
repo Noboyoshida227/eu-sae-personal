@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.3 - 2026-09-13
+
+- Included the Windows startup fix in the complete EU_SAE_520_w5c.zip; no separate patch is needed.
+- Install missing/outdated R packages using Windows binaries, with visible download diagnostics.
+- Detect an existing Pandoc >= 2.8 or install an official binary in the current user's storage.
+- Verify package loading and stop setup on failure before opening the wizard; save startup_setup.log for troubleshooting.
+- Statistical calculations and MCPE defaults are unchanged from w5b. Network or device policy can still prevent dependency installation.
+
+
 ## 5.2.0-rc.6-wizard.5.2 - 2026-09-12
 
 - Removed dots from the release folder and ZIP basename: `EU_SAE_520_w5b/` and `EU_SAE_520_w5b.zip`. Only the file extension retains a dot.
