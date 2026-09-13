@@ -17,7 +17,7 @@ parse_ok <- vapply(r_files, function(path) {
 check(all(parse_ok), "all R sources parse")
 check(identical(trimws(readLines("VERSION", warn = FALSE)[1]), "5.2.0-rc.6"), "VERSION is the candidate version")
 check(identical(trimws(readLines("WIZARD_VERSION", warn = FALSE)[1]),
-                "5.2.0-rc.6-wizard.5"),
+                "5.2.0-rc.6-wizard.5.1"),
       "WIZARD_VERSION identifies the rc.6 wizard overlay")
 wizard_version <- trimws(readLines("WIZARD_VERSION", warn = FALSE)[1])
 changelog_text <- read_all("docs/CHANGELOG.md")
@@ -119,8 +119,8 @@ check(grepl("sae_write_release_manifest", wizard_manifest_text, fixed = TRUE),
 wizard_resources <- c(
   "docs/guidance/guidelines_v5_2_0_rc6_wizard.docx",
   "docs/MCPE_VALIDATION_STATUS.md",
-  "docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5.pdf",
-  "docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5.pptx"
+  "docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5_1.pdf",
+  "docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5_1.pptx"
 )
 check(all(vapply(wizard_resources, file.exists, logical(1))) &&
         all(vapply(wizard_resources, grepl, logical(1), x = wizard_text,
@@ -186,7 +186,32 @@ check(grepl("render_report     = FALSE", app_text, fixed = TRUE) &&
 check(grepl("params      = list(include_ai", support_text, fixed = TRUE) &&
         grepl("render_final_report <- function", support_text, fixed = TRUE),
       "report helper receives the AI inclusion parameter")
-check(dir.exists("outputs/figures"), "figures output directory exists after clean or completed runs")
+# A fresh clone need not contain generated output directories. Exercise the
+# actual cleanup function in an isolated fixture, never the user's run outputs.
+output_setup_ok <- local({
+  declarations <- parse("app_support.R", encoding = "UTF-8")
+  cleanup <- Filter(function(x) is.call(x) && identical(x[[1]], as.name("<-")) &&
+    identical(x[[2]], as.name(".pipeline_clean_outputs")), declarations)
+  stopifnot(length(cleanup) == 1L)
+  env <- new.env(parent = globalenv())
+  eval(cleanup[[1]], env)
+  fixture <- tempfile("output_setup_")
+  dir.create(fixture)
+  stopifnot(startsWith(normalizePath(fixture, winslash = "/"),
+    paste0(normalizePath(tempdir(), winslash = "/"), "/")))
+  previous <- setwd(fixture)
+  tryCatch({
+    env$.pipeline_clean_outputs(logger = function(...) NULL)
+    created <- all(dir.exists(file.path("outputs", c("data", "tables", "figures", "logs"))))
+    writeLines("stale", "outputs/figures/old.txt")
+    env$.pipeline_clean_outputs(logger = function(...) NULL)
+    created && dir.exists("outputs/figures") && !file.exists("outputs/figures/old.txt")
+  }, finally = {
+    setwd(previous)
+    unlink(fixture, recursive = TRUE)
+  })
+})
+check(output_setup_ok, "pipeline creates and cleans generated output directories in a fresh workspace")
 
 source("R/input_readers.R")
 bad_rds <- tempfile(fileext = ".rds")

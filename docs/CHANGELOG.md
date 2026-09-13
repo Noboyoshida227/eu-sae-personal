@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.1 - 2026-09-12
+
+- Final short-name package: `EU_SAE_5.2.0_w5a.zip`, containing `EU_SAE_5.2.0_w5a/`.
+- Corrected the fresh-clone test to exercise output-directory creation and cleanup, rather than requiring generated folders to be committed.
+- Includes the shorter-name release workflow from wizard.5; statistical analysis code remains unchanged.
+
 ## 5.2.0-rc.6-wizard.5 - 2026-09-12
 
 - Shortened the distributable ZIP to `EU_SAE_5.2.0_w5.zip` and the application
