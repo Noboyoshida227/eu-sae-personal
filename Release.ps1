@@ -87,7 +87,7 @@ if ($git) {
 
 # ---- 2. one version, built once ------------------------------------------
 $packageName = (Get-Content -LiteralPath 'RELEASE_NAME' -Raw).Trim()
-if ($packageName -cnotmatch '^EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}$') {
+if ($packageName -cnotmatch '^EU_SAE_[A-Za-z0-9][A-Za-z0-9_-]{0,31}$') {
     Write-Bad "Invalid RELEASE_NAME."; exit 1
 }
 $target = Join-Path 'dist' $packageName

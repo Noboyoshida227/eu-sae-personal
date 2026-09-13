@@ -17,7 +17,7 @@ parse_ok <- vapply(r_files, function(path) {
 check(all(parse_ok), "all R sources parse")
 check(identical(trimws(readLines("VERSION", warn = FALSE)[1]), "5.2.0-rc.6"), "VERSION is the candidate version")
 check(identical(trimws(readLines("WIZARD_VERSION", warn = FALSE)[1]),
-                "5.2.0-rc.6-wizard.5.1"),
+                "5.2.0-rc.6-wizard.5.2"),
       "WIZARD_VERSION identifies the rc.6 wizard overlay")
 wizard_version <- trimws(readLines("WIZARD_VERSION", warn = FALSE)[1])
 changelog_text <- read_all("docs/CHANGELOG.md")
@@ -101,7 +101,7 @@ source("R/release_packaging.R")
 check(identical(sae_release_name("."), trimws(readLines("RELEASE_NAME", warn = FALSE)[1])), "release uses the short package name")
 name_fixture <- tempfile("release_name_")
 dir.create(name_fixture)
-for (bad_name in c("../escape", "EU_SAE_../escape", "EU_SAE_", paste0("EU_SAE_", strrep("x", 33)))) {
+for (bad_name in c("EU_SAE_5.2.0_w5", "../escape", "EU_SAE_../escape", "EU_SAE_", paste0("EU_SAE_", strrep("x", 33)))) {
   writeLines(bad_name, file.path(name_fixture, "RELEASE_NAME"))
   check(inherits(try(sae_release_name(name_fixture), silent = TRUE), "try-error"), paste("reject invalid release name", bad_name))
 }
@@ -119,8 +119,8 @@ check(grepl("sae_write_release_manifest", wizard_manifest_text, fixed = TRUE),
 wizard_resources <- c(
   "docs/guidance/guidelines_v5_2_0_rc6_wizard.docx",
   "docs/MCPE_VALIDATION_STATUS.md",
-  "docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5_1.pdf",
-  "docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5_1.pptx"
+  "docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5_2.pdf",
+  "docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5_2.pptx"
 )
 check(all(vapply(wizard_resources, file.exists, logical(1))) &&
         all(vapply(wizard_resources, grepl, logical(1), x = wizard_text,

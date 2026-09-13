@@ -1,7 +1,7 @@
 # Short, portable name shared by the package folder and distributable ZIP.
 sae_release_name <- function(root = ".") {
   name <- trimws(readLines(file.path(root, "RELEASE_NAME"), warn = FALSE)[1L])
-  if (is.na(name) || !grepl("^EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}$", name)) {
+  if (is.na(name) || !grepl("^EU_SAE_[A-Za-z0-9][A-Za-z0-9_-]{0,31}$", name)) {
     stop("Invalid RELEASE_NAME: use EU_SAE_ followed by up to 32 filename-safe characters.")
   }
   name

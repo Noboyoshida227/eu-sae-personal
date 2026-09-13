@@ -31,7 +31,7 @@ Edit files at the repository root. Never edit anything under `dist\`.
 cd C:\Users\noboy\Repos\eu-sae-personal
 
 # 1. bump the version everywhere (use --dry-run first to see what it will touch)
-python tools\bump_version.py 5.2.0-rc.6-wizard.6 --release-name EU_SAE_5.2.0_w6
+python tools\bump_version.py 5.2.0-rc.6-wizard.6 --release-name EU_SAE_520_w6
 
 # 2. write the CHANGELOG entry under  ## 5.2.0-rc.6-wizard.6 - <date>
 #    (docs\CHANGELOG.md - describe what changed and why)
@@ -92,6 +92,6 @@ delete. Nothing in them is needed to rebuild a release.
 ## Short release names
 
 `RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
-The current name is `EU_SAE_5.2.0_w5a`; the full version remains in `WIZARD_VERSION`.
+The current name is `EU_SAE_520_w5b`; the full version remains in `WIZARD_VERSION`.
 For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
 The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

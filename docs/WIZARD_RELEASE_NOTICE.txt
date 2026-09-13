@@ -1,6 +1,6 @@
 EU SAE APPLICATION PACKAGE - WIZARD RELEASE NOTICE
 
-Wizard overlay version: 5.2.0-rc.6-wizard.5.1
+Wizard overlay version: 5.2.0-rc.6-wizard.5.2
 Underlying package version: 5.2.0-rc.6
 
 This candidate was assembled from the verified 5.2.0-rc.5 wizard distribution

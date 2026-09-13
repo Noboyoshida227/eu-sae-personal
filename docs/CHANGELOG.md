@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.2 - 2026-09-12
+
+- Removed dots from the release folder and ZIP basename: `EU_SAE_520_w5b/` and `EU_SAE_520_w5b.zip`. Only the file extension retains a dot.
+- Release-name validation now permits letters, numbers, underscores and hyphens, preventing dotted package names in future builds.
+- Full version identifiers remain inside the package. Statistical analysis code is unchanged.
+
 ## 5.2.0-rc.6-wizard.5.1 - 2026-09-12
 
 - Final short-name package: `EU_SAE_5.2.0_w5a.zip`, containing `EU_SAE_5.2.0_w5a/`.

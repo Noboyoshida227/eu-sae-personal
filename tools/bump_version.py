@@ -87,7 +87,7 @@ def patch_office_zip(path, part_pattern, old, new, dry):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("new_version")
-    ap.add_argument("--release-name", help="Short package/ZIP name, e.g. EU_SAE_5.2.0_w6")
+    ap.add_argument("--release-name", help="Short package/ZIP name, e.g. EU_SAE_520_w6")
     ap.add_argument("--dry-run", action="store_true", help="report what would change, touch nothing")
     ap.add_argument("--skip-pdf", action="store_true", help="do not regenerate the PDF (reportlab absent here)")
     a = ap.parse_args()
@@ -96,8 +96,8 @@ def main():
     new = a.new_version.strip()
     if not re.fullmatch(r"[A-Za-z0-9._-]+", new): die(f"invalid version {new!r} (letters, digits, . _ - only)")
     if new == old: die(f"WIZARD_VERSION is already {old}")
-    short_name = a.release_name or ("EU_SAE_" + new)
-    if not re.fullmatch(r"EU_SAE_[A-Za-z0-9][A-Za-z0-9._-]{0,31}", short_name):
+    short_name = a.release_name or ("EU_SAE_" + new.replace(".", ""))
+    if not re.fullmatch(r"EU_SAE_[A-Za-z0-9][A-Za-z0-9_-]{0,31}", short_name):
         die("Supply a shorter --release-name (EU_SAE_ plus up to 32 filename-safe characters).")
     if (ROOT / "dist" / short_name).exists():
         die(f"Release folder already exists: dist/{short_name}")

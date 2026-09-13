@@ -31,8 +31,8 @@ Ports advance if occupied. There is no supplied wizard shell launcher; manual
 launch through R remains possible from the package root using
 `source("app_wizard.R")` after installing dependencies.
 
-- [Download and verification instructions](docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5_1.pdf)
-- [Wizard reference](docs/README_WIZARD.md) and [slide guide](docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5_1.pptx)
+- [Download and verification instructions](docs/instructions/EU_SAE_Download_Instructions_5_2_0_rc_6_wizard_5_2.pdf)
+- [Wizard reference](docs/README_WIZARD.md) and [slide guide](docs/instructions/EU_SAE_User_Guide_5_2_0_rc_6_wizard_5_2.pptx)
 - [Methodological guidance](docs/guidance/guidelines_v5_2_0_rc6_wizard.docx)
 - [Examples and your own input folders](Data/README.md)
 
@@ -184,6 +184,6 @@ uncertainty. See Section 11.9 of the guidance note.
 ### Short release packages
 
 Run `Release.ps1` from a clean, committed source folder to create
-`dist/EU_SAE_5.2.0_w5a/EU_SAE_5.2.0_w5a.zip` and its matching application folder.
+`dist/EU_SAE_520_w5b/EU_SAE_520_w5b.zip` and its matching application folder.
 `RELEASE_NAME` controls these short names; `WIZARD_VERSION` retains the full version.
 Use `tools/bump_version.py <new-version> --release-name <new-short-name>` for later releases.
