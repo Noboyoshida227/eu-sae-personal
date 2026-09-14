@@ -41,11 +41,21 @@ repository.
 ## macOS: two things that can block the first launch
 
 **1. "Apple could not verify..." or "unidentified developer".**
-macOS marks everything extracted from a downloaded ZIP as untrusted. Right-click
-(or Control-click) the launcher, choose **Open**, then confirm **Open** in the
-dialog. If your macOS version offers no Open button, go to
- **System Settings → Privacy & Security**, scroll down, and click
-**Open Anyway** next to the blocked file. You only do this once per launcher.
+macOS marks everything extracted from a downloaded ZIP as untrusted, and the
+launchers are not code-signed.
+
+- **macOS 15 (Sequoia) or later:** double-click the launcher once and dismiss
+  the dialog (it may offer only *Done*). Then open **System Settings →
+  Privacy & Security**, scroll down to the Security section, click
+  **Open Anyway** next to the launcher name, confirm, and double-click it again.
+- **macOS 14 or earlier:** right-click (or Control-click) the launcher, choose
+  **Open**, then confirm **Open** in the dialog.
+
+You only do this once per launcher. Alternatively, in Terminal type `bash `
+(with a trailing space), drag the launcher onto the window and press Return;
+this shows any error messages on screen. On a managed (organization) computer
+a device policy may still block the launcher or the Pandoc download below;
+`startup_setup.log` in the package folder records what happened.
 
 **2. Double-clicking does nothing at all.**
 The ZIP was built on Windows, which does not record the Unix "executable"
@@ -59,6 +69,18 @@ permission, so the launcher may arrive without it. Fix it once, either way:
   the permission, so double-clicking works from then on.
 
 ---
+
+## Pandoc (report rendering)
+
+The final HTML/Word report needs Pandoc. The launcher looks for one that is
+already installed (RStudio, Positron and Quarto ship one; so do Homebrew and
+the installer from pandoc.org). If none is found it downloads a pinned,
+checksum-verified copy (26-42 MB, once) into your user profile; no
+administrator rights are needed. Without internet access the app still
+starts and runs the analysis; the run then ends as *Analysis completed -
+report unavailable* and `startup_setup.log` / the run log say why. To work
+fully offline, install Pandoc from https://pandoc.org/installing.html or
+point `EU_SAE_PANDOC` at a folder containing `pandoc` / `pandoc.exe`.
 
 ## If R cannot be found
 

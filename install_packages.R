@@ -152,64 +152,26 @@ for (pkg in cran_packages) {
   })
 }
 
-# Pandoc is a separate executable, not just an R package.
-ensure_report_pandoc <- function() {
-  use_dir <- function(path) {
-    if (!length(path) || is.na(path) || !nzchar(path)) return(FALSE)
-    exe <- file.path(path, if (.Platform$OS.type == "windows") "pandoc.exe" else "pandoc")
-    if (!file.exists(exe)) return(FALSE)
-    info <- tryCatch(rmarkdown::find_pandoc(cache = FALSE, dir = path),
-                     error = function(e) NULL)
-    if (is.null(info) || info$version < numeric_version("2.8")) return(FALSE)
-    Sys.setenv(RSTUDIO_PANDOC = path)
-    rmarkdown::find_pandoc(cache = FALSE)
-    cat("  OK: Pandoc", as.character(info$version), "at", path, "\n")
-    TRUE
-  }
-  current <- rmarkdown::find_pandoc(cache = FALSE)
-  if (current$version >= numeric_version("2.8") && use_dir(current$dir)) return(invisible(TRUE))
-  candidates <- c(
-    file.path(Sys.getenv("ProgramFiles"), "RStudio/resources/app/bin/quarto/bin/tools"),
-    file.path(Sys.getenv("ProgramFiles"), "RStudio/bin/pandoc"),
-    file.path(Sys.getenv("LOCALAPPDATA"), "Programs/RStudio/resources/app/bin/quarto/bin/tools"),
-    file.path(Sys.getenv("LOCALAPPDATA"), "Pandoc"),
-    file.path(Sys.getenv("ProgramFiles"), "Pandoc"),
-    file.path(Sys.getenv("ProgramFiles"), "Quarto/bin/tools"),
-    "/Applications/RStudio.app/Contents/Resources/app/bin/quarto/bin/tools",
-    "/usr/lib/rstudio/resources/app/bin/quarto/bin/tools",
-    # macOS / Linux: pandoc.org .pkg installer, Homebrew, MacPorts, ~/opt/pandoc.
-    # A double-clicked .command has a minimal PATH, so look here explicitly.
-    "/usr/local/bin", "/opt/homebrew/bin", "/opt/local/bin", "/opt/pandoc",
-    path.expand("~/opt/pandoc"), "/usr/bin")
-  for (path in candidates) if (use_dir(path)) return(invisible(TRUE))
-  # The CRAN pandoc package manages official Pandoc binaries in user storage.
-  if (!requireNamespace("pandoc", quietly = TRUE)) {
-    install.packages("pandoc", repos = "https://cloud.r-project.org",
-                     lib = .libPaths()[1], quiet = FALSE,
-                     type = if (.Platform$OS.type == "windows") "binary" else getOption("pkgType"))
-  }
-  if (!requireNamespace("pandoc", quietly = TRUE)) stop("Could not install the Pandoc installer R package.")
-  installed <- pandoc::pandoc_installed_latest()
-  if (length(installed) && !is.na(installed)) {
-    path <- dirname(pandoc::pandoc_bin(installed))
-    if (use_dir(path)) return(invisible(TRUE))
-  }
-  cat("  Installing official Pandoc binary for the current user...\n")
-  pandoc::pandoc_install()
-  path <- dirname(pandoc::pandoc_bin(pandoc::pandoc_installed_latest()))
-  if (!use_dir(path)) stop("Pandoc was downloaded but could not be run, or is older than 2.8.")
-  invisible(TRUE)
-}
-
-cat("\n[2/3] Checking Pandoc (needed only for report export)...\n")
-pandoc_error <- tryCatch({ensure_report_pandoc(); NULL}, error = function(e) conditionMessage(e))
+# --- 2. Pandoc (needed only to render the final HTML/Word report) -------
+# R/pandoc_bootstrap.R finds an existing Pandoc (RStudio/Quarto bundles, PATH,
+# Homebrew, pandoc.org installer, an earlier download) or downloads one pinned,
+# SHA-256-verified release into the user's R cache folder. Base R only: no
+# `pandoc`/`gh`/`rlang` version interplay, no admin rights, bounded timeout,
+# at most one download attempt per session.
+cat("\n[2/3] Checking Pandoc (report rendering)...\n")
+pandoc_error <- tryCatch({
+  source(file.path("R", "pandoc_bootstrap.R"), local = TRUE)
+  res <- sae_ensure_pandoc(root = getwd(), min_version = "2.8")
+  if (isTRUE(res$ok)) NULL else if (is.character(res$reason)) res$reason else "Pandoc is not available."
+}, error = function(e) conditionMessage(e))
 if (!is.null(pandoc_error)) {
   cat("  Pandoc setup failed:", pandoc_error, "\n")
   cat("  This does not prevent startup if the R-package checks below pass.\n")
-  cat("  Analysis can run, but final Word/HTML reports cannot be generated without Pandoc.\n")
-  cat("  A run that attempts report generation may still be marked failed at that stage.\n")
-  cat("  Install Pandoc from https://pandoc.org/installing.html and restart the launcher.\n")
-  cat("  Windows: use the .msi installer. macOS: use the .pkg installer.\n")
+  cat("  Analysis can run; the run will finish as 'Analysis completed - report\n")
+  cat("  unavailable' and outputs/final_report.html/.docx will not be produced.\n")
+  cat("  To fix: connect to the internet and run the launcher again (the app\n")
+  cat("  downloads its own copy), or install Pandoc from https://pandoc.org/installing.html\n")
+  cat("  (Windows: .msi installer; macOS: .pkg installer) and run the launcher again.\n")
 }
 
 # --- 3. Verify all packages load ---------------------------
@@ -244,7 +206,7 @@ if (length(failed) == 0) {
   )
   utils::write.csv(package_versions, local_version_report, row.names = FALSE)
   cat("\n  All packages installed successfully.\n")
-  if (!is.null(pandoc_error)) cat("  NOTE: Pandoc setup is incomplete; final report generation requires Pandoc.\n")
+  if (!is.null(pandoc_error)) cat("  NOTE: Pandoc is not available; the final report will be skipped until it is.\n")
   cat("  Package versions recorded locally in ", local_version_report, ".\n", sep = "")
   cat("  This local report is for troubleshooting only and is ignored by Git.\n")
   cat("  You can now run the app with:  shiny::runApp('app.R')\n\n")

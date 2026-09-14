@@ -20,6 +20,9 @@ outputs/figures/*
 final_report.html
 Rplots.pdf
 
+# ---- Local-only Pandoc copy (see R/pandoc_bootstrap.R; never released) ----
+tools/pandoc/
+
 # ---- Run logs ----
 app_runs/
 

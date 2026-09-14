@@ -1,0 +1,55 @@
+# Pandoc patch v2 for eu-sae-personal (13 Sep 2026)
+
+Supersedes `EU_SAE_520_w5c_pandoc_patch.zip` (v1). All six points in
+`PANDOC_PATCH_REVIEW.md` are addressed. The files were written into the working
+tree of `C:\Users\noboy\Repos\eu-sae-personal` (uncommitted) and are also in
+`eu-sae-personal_pandoc_patch_v2.zip` at package-relative paths.
+
+## Files changed
+
+| File | Status | What |
+|---|---|---|
+| `R/pandoc_bootstrap.R` | new | Finder/fetcher. Review #1: extraction only after a computed AND matching SHA-256; archive always discarded. #3: timeout bounded (`EU_SAE_PANDOC_TIMEOUT`, default 600 s), one attempt per method (wininet fallback on Windows only), one download attempt per R session, every failure returns `list(ok=FALSE, reason=...)` with the underlying error. #4: rmarkdown pinned with `find_pandoc(cache=FALSE, dir=)` and the returned dir/version verified before success is reported. |
+| `install_packages.R` | modified (from the repo's current local version) | Step [2/3] calls `sae_ensure_pandoc()`; prints the reason; never fatal. |
+| `app_support.R` | modified | `render_final_report()` returns `sae_report_result()` (`status` rendered/skipped/unavailable, `html`, `docx`, `reason`); on missing Pandoc logs a warning that no longer asserts which outputs exist, emits `progress_callback("skipped","Report")`, returns instead of throwing. |
+| `app.R` | modified | Review #2: captures the report result; `pipeline_progress` handles `skipped`; final status is **"Analysis completed - report unavailable"** with the reason in the run-folder status and log; "Completed successfully" only when the report rendered. The wizard reuses this server code unchanged. |
+| `tests/test_startup.R` | modified | Review #6: mocks `sae_ensure_pandoc()` instead of `pandoc::*`; adds `pandoc_offline`; asserts the Pandoc step runs exactly once and is never fatal, and that the underlying reason is printed. 9 cases pass. |
+| `tests/test_pandoc_bootstrap.R` | new | 28 checks, no network: override/cache/package-local precedence, minimum version, offline, success, NA checksum, mismatch, download failure + single attempt, extraction failure, unrunnable executable, timeout bounds, real SHA-256 helper, rmarkdown pinning, and the skipped-report status of `render_final_report()`. |
+| `scripts/release_inventory.csv` | modified | adds `R/pandoc_bootstrap.R` (tests stay dev-only, like `test_startup.R`). |
+| `.gitignore` | modified | ignores `tools/pandoc/`. |
+| `docs/CHANGELOG.md` | modified | entry for `5.2.0-rc.6-wizard.5.4` (run `python tools\bump_version.py 5.2.0-rc.6-wizard.5.4` before `Release.ps1`). |
+| `docs/RELEASE_CHECKLIST.md` | modified | adds the two test scripts and a no-Pandoc / offline smoke test. |
+| `Start_Here/README.md` | modified | Review #5 and wording: macOS 15 route first; managed-device caveat; Pandoc paragraph; offline = `EU_SAE_PANDOC` or pandoc.org install. No "bypass" claims. |
+| `Start_Here/Start_Wizard.command`, `Start_Dashboard.command` | modified | write `startup_setup.log` like the `.bat` files; header points to Open Anyway. |
+
+Not done, deliberately: a "render the report again" button (review #2, optional).
+Today a user who installs Pandoc after a run re-runs the analysis. Worth a
+small follow-up in the wizard (a button that calls `render_final_report()` on
+the existing `outputs/`), but it touches UI in both `app.R` and `app_wizard.R`
+and should be its own change.
+
+## Verified here (Linux, R 4.3.3, rmarkdown 2.25, digest present)
+
+- All 43 R files in the package parse.
+- `Rscript tests/test_startup.R`: 9/9 pass. `Rscript tests/test_pandoc_bootstrap.R`: 28/28 pass.
+- Earlier (v1) end-to-end on Linux: real download of the pinned 3.11 asset, checksum, extraction, `rmarkdown::render()` with only that copy; macOS and Windows archive layouts checked against the real 3.11 files.
+
+Not verified here: `tests/run_tests.R` (needs the full package stack; the
+reviewer's Windows run of the v1 patch passed 104/104), a real Windows or
+macOS first-run download with v2, and managed-laptop policies. Please run on
+Windows before building:
+
+```
+Rscript tests/test_startup.R
+Rscript tests/test_pandoc_bootstrap.R
+Rscript tests/run_tests.R
+Rscript scripts/check_dependency_lock.R
+```
+
+## What the reviewer got right / small corrections
+
+The review is accurate on every substantive point. Two small notes: gh 1.6.0
+is dated 29 May 2026 on CRAN (I had said June); and Alex's log does not show
+his gh version, so the diagnosis is "consistent with gh >= 1.6.0 + rlang 1.1.6",
+not proven on his machine. Neither changes the fix, because the new code does
+not use gh at all.

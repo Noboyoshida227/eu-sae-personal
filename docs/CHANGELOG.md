@@ -1,5 +1,14 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.4 - 2026-09-14
+
+- Pandoc is now obtained without the CRAN `pandoc`/`gh` packages. `R/pandoc_bootstrap.R` (base R only) reuses an existing Pandoc >= 2.8 (RStudio, Positron or Quarto bundles, PATH, Homebrew, the pandoc.org installer, or an earlier download) and otherwise downloads the pinned Pandoc 3.11 release for the platform into the user's R cache folder. Extraction happens only after the SHA-256 is computed and matches the pinned digest; the download timeout is bounded (`EU_SAE_PANDOC_TIMEOUT`, default 600 s) and a failed download is not retried within the same session. Fixes the macOS startup failure `could not find function "check_string"` (gh >= 1.6.0 with rlang < 1.2.0).
+- A missing Pandoc no longer stops the launcher and no longer fails a run. The dashboard finishes as "Analysis completed - report unavailable", the run folder status names the reason, and the report step is shown as skipped; estimation outputs and Excel tables are kept. `render_final_report()` returns a status list instead of throwing.
+- rmarkdown is pinned to the Pandoc folder selected by the launcher (`find_pandoc(dir = )`) and the selection is verified, so the reported and the rendering Pandoc are the same.
+- macOS launchers write `startup_setup.log` like the Windows launchers; `Start_Here/README.md` describes the macOS 15 "Open Anyway" route first.
+- Tests: `tests/test_startup.R` mocks the new helper; new `tests/test_pandoc_bootstrap.R` covers override and cache precedence, offline mode, unavailable and mismatching checksums, download and extraction failures, single-attempt behaviour, rmarkdown pinning and the skipped-report status.
+- Offline use: `EU_SAE_PANDOC=<folder>` or a `tools/pandoc/` folder inside an already extracted package (local only; the release builder does not include it). Statistical calculations and MCPE defaults are unchanged from w5c.
+
 ## 5.2.0-rc.6-wizard.5.3 - 2026-09-13
 
 - Included the Windows startup fix in the complete EU_SAE_520_w5c.zip; no separate patch is needed.

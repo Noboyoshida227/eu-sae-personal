@@ -36,6 +36,7 @@ R/mfh_model_selection.R
 R/msae_compat.R
 R/multilingual.R
 R/normality_evaluator.R
+R/pandoc_bootstrap.R
 R/pipeline_helpers.R
 R/release_controls.R
 R/release_packaging.R

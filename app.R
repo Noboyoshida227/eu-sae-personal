@@ -3443,6 +3443,8 @@ server <- function(input, output, session) {
         )
         advance_progress(label, detail)
         status(sprintf("Running %s...", label))
+      } else if (event == "skipped") {
+        status(sprintf("%s skipped", label))
       }
     }
 
@@ -3562,6 +3564,10 @@ server <- function(input, output, session) {
       })
     }
 
+    # The report step can be skipped (Pandoc unavailable) without failing the
+    # run: estimates and tables are complete, only final_report.html/.docx are
+    # missing. That is shown as a distinct final status, never as success.
+    report_result <- NULL
     if (ok) {
       tryCatch({
         save_comparison_ai_interpretations(ai_state)
@@ -3571,7 +3577,7 @@ server <- function(input, output, session) {
           sum(statuses == "generated"), sum(statuses == "failed"),
           sum(statuses == "disabled")
         ))
-        render_final_report(
+        report_result <- render_final_report(
           include_ai = ai_requested,
           logger = pipeline_logger,
           progress_callback = pipeline_progress
@@ -3581,6 +3587,8 @@ server <- function(input, output, session) {
         err_msg <<- paste("Final report rendering failed:", conditionMessage(e))
       })
     }
+    report_missing <- ok && !is.null(report_result) && !isTRUE(report_result$rendered)
+    report_reason  <- if (report_missing && is.character(report_result$reason)) report_result$reason else NULL
 
     # ---- Step 3: Check outputs and enrich diagnostics ----
     advance_progress("Finalizing", if (ok) "Checking outputs" else "Pipeline failed")
@@ -3883,7 +3891,12 @@ server <- function(input, output, session) {
         run_location(paste(
           paste("Run folder:", run_dir_abs),
           paste("Archived outputs:", normalizePath(archive_dir, winslash = "/", mustWork = FALSE)),
-          "Status: completed successfully",
+          if (report_missing) {
+            paste0("Status: analysis completed; final report NOT rendered (",
+                   report_reason %||% "Pandoc unavailable", ")")
+          } else {
+            "Status: completed successfully"
+          },
           sep = "\n"
         ))
         append_log(paste(
@@ -3893,8 +3906,18 @@ server <- function(input, output, session) {
       }, error = function(e) {
         append_log(paste("WARNING: Could not archive run outputs:", e$message))
       })
-      status("Completed successfully")
-      progress$set(value = n_steps, detail = "Complete")
+      if (report_missing) {
+        status("Analysis completed - report unavailable")
+        progress$set(value = n_steps, detail = "Complete (report skipped)")
+        append_log(paste0(
+          "NOTE: Run finished without the final report. ",
+          report_reason %||% "Pandoc unavailable",
+          " Re-run after Pandoc is available to produce outputs/final_report.html."
+        ))
+      } else {
+        status("Completed successfully")
+        progress$set(value = n_steps, detail = "Complete")
+      }
       tryCatch({
         save_current_dashboard_setup("successful run")
       }, error = function(e) {

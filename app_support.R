@@ -20,6 +20,7 @@ if (!exists("sae_write_run_metadata", mode = "function")) {
 }
 
 source(file.path("R", "report_export.R"))
+source(file.path("R", "pandoc_bootstrap.R"))
 
 parse_years <- function(x) {
   if (is.numeric(x)) return(sort(as.integer(x)))
@@ -828,47 +829,53 @@ enrich_diagnostics_from_output <- function(output_df, yr, model_type = "UFH") {
   logger("Cleared previous generated outputs for this run.")
 }
 
+# Result helper for render_final_report(): a plain list the dashboard can show.
+#   status  "rendered" | "skipped" | "unavailable"
+#   html / docx  paths that exist, or NULL
+#   reason  why the report was skipped (NULL when rendered)
+sae_report_result <- function(status, reason = NULL, html = NULL, docx = NULL) {
+  list(
+    status   = status,
+    rendered = identical(status, "rendered"),
+    html     = if (!is.null(html) && file.exists(html)) html else NULL,
+    docx     = if (!is.null(docx) && file.exists(docx)) docx else NULL,
+    reason   = reason
+  )
+}
+
 render_final_report <- function(include_ai = FALSE, logger = message,
                                 progress_callback = NULL, include_word = TRUE) {
   report_rmd <- "report.Rmd"
+  html_out <- file.path("outputs", "final_report.html")
+  docx_out <- file.path("outputs", "final_report.docx")
   if (!file.exists(report_rmd)) {
     logger("Warning: report.Rmd not found; skipping report rendering.")
-    return(invisible(FALSE))
+    return(invisible(sae_report_result("skipped", "report.Rmd not found")))
   }
 
   if (is.function(progress_callback)) {
     progress_callback("start", "Report")
   }
 
-  logger("Rendering final report...")
-
-  # Auto-detect pandoc for batch mode (outside RStudio).
-  if (!rmarkdown::pandoc_available()) {
-    pandoc_candidates <- c(
-      Sys.getenv("RSTUDIO_PANDOC"),
-      dirname(Sys.which("pandoc")),
-      dirname(Sys.which("quarto")),
-      file.path(Sys.getenv("ProgramFiles"), "RStudio",
-                "resources", "app", "bin", "quarto", "bin", "tools"),
-      file.path(Sys.getenv("LOCALAPPDATA"), "Pandoc"),
-      "/Applications/RStudio.app/Contents/Resources/app/bin/quarto/bin/tools",
-      "/Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools",
-      "/Applications/Quarto.app/Contents/Resources/app/bin/tools",
-      "/Applications/Quarto.app/Contents/Resources/app/quarto/bin/tools",
-      "/usr/lib/rstudio/resources/app/bin/quarto/bin/tools",
-      "/usr/lib/rstudio/resources/app/quarto/bin/tools",
-      "/usr/local/bin",
-      "/opt/homebrew/bin",
-      "/usr/bin"
-    )
-    for (p in pandoc_candidates) {
-      if (nzchar(p) && (file.exists(file.path(p, "pandoc.exe")) ||
-                        file.exists(file.path(p, "pandoc")))) {
-        Sys.setenv(RSTUDIO_PANDOC = p)
-        break
-      }
-    }
+  # Locate Pandoc (or fetch a private copy for this user) before rendering.
+  # Without it the analysis outputs already written to outputs/ are left in
+  # place and the report step is reported as skipped, not as a failed run.
+  logger("Checking Pandoc (a private copy is downloaded on first use if none is installed)...")
+  pandoc <- tryCatch(sae_ensure_pandoc(root = getwd(), min_version = "2.8", quiet = TRUE),
+                     error = function(e) list(ok = FALSE, reason = conditionMessage(e)))
+  if (!isTRUE(pandoc$ok)) {
+    reason <- if (is.character(pandoc$reason) && nzchar(pandoc$reason)) pandoc$reason else "Pandoc is not available."
+    logger(paste0(
+      "WARNING: Report not rendered - ", reason, " ",
+      "Estimation outputs already written to outputs/ are unaffected; ",
+      "outputs/final_report.html and .docx were not produced. ",
+      "Connect to the internet and run again, or install Pandoc from ",
+      "https://pandoc.org/installing.html and run again."
+    ))
+    if (is.function(progress_callback)) progress_callback("skipped", "Report")
+    return(invisible(sae_report_result("unavailable", reason)))
   }
+  logger(sprintf("Rendering final report with Pandoc %s (%s)...", pandoc$version, pandoc$dir))
 
   rmarkdown::render(
     input       = report_rmd,
@@ -896,7 +903,7 @@ render_final_report <- function(include_ai = FALSE, logger = message,
   if (is.function(progress_callback)) {
     progress_callback("complete", "Report")
   }
-  invisible(TRUE)
+  invisible(sae_report_result("rendered", html = html_out, docx = docx_out))
 }
 
 run_pipeline_from_config <- function(config_path, logger = message,

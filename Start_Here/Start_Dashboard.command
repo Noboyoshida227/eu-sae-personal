@@ -9,6 +9,10 @@
 #
 #  Linux:  run  bash "Start_Here/Start_Dashboard.command"  from a terminal.
 #
+#  If double-clicking shows 'Apple could not verify...' (macOS 15 and later):
+#  open System Settings > Privacy & Security, scroll down, click Open Anyway
+#  next to this file, then double-click it again. This is needed once.
+#
 #  If double-clicking does nothing, the executable permission was lost
 #  when the ZIP was extracted. Open Terminal and run this once:
 #      chmod +x "/path/to/package/Start_Here/"*.command
@@ -175,15 +179,20 @@ fi
 #    the next free local port. Sourcing it rather than calling
 #    shiny::runApp(appDir=) avoids a double-runApp nesting that breaks
 #    static asset serving (www/eu_poverty_map.png and friends).
-"$RSCRIPT" -e "if (file.exists('install_packages.R')) source('install_packages.R'); source('app.R')"
+echo "Checking R packages and Pandoc. First-time downloads may take several minutes."
+echo "Setup details are saved in startup_setup.log in the package folder."
+echo ""
+"$RSCRIPT" -e "local({con <- file('startup_setup.log', open='wt'); sink(con, split=TRUE); sink(con, type='message'); on.exit({sink(type='message'); sink(); close(con)}); if (file.exists('install_packages.R')) source('install_packages.R')}); source('app.R')"
 APP_EXIT=$?
 
 if [ "$APP_EXIT" -ne 0 ]; then
   echo ""
   echo "--------------------------------------------"
-  echo "The application exited with an error (code $APP_EXIT)."
+  echo "Setup or application startup failed (exit code $APP_EXIT)."
   echo "--------------------------------------------"
   echo ""
+  echo "Please send startup_setup.log from the package folder for troubleshooting."
+  if [ -f "startup_setup.log" ]; then echo ""; cat "startup_setup.log"; echo ""; fi
   echo "If packages failed to install, check your internet connection and"
   echo "try again. On macOS, spatial packages (sf, terra) install as ready-"
   echo "made binaries from CRAN; if R tries to compile them from source,"

@@ -4,10 +4,10 @@ installer <- if (length(args)) args[1] else "install_packages.R"
 code <- paste(readLines(installer), collapse="\n")
 code <- gsub("utils::packageVersion", "test_version", code, fixed=TRUE)
 code <- gsub("utils::write.csv", "test_write", code, fixed=TRUE)
-code <- gsub("rmarkdown::find_pandoc", "test_find", code, fixed=TRUE)
-code <- gsub("pandoc::pandoc_installed_latest", "test_latest", code, fixed=TRUE)
-code <- gsub("pandoc::pandoc_install", "test_install_pandoc", code, fixed=TRUE)
-code <- gsub("pandoc::pandoc_bin", "test_bin", code, fixed=TRUE)
+# Pandoc is handled by R/pandoc_bootstrap.R; replace its loader and entry point.
+code <- gsub('source(file.path("R", "pandoc_bootstrap.R"), local = TRUE)', "invisible(NULL)", code, fixed=TRUE)
+code <- gsub("sae_ensure_pandoc(", "test_ensure_pandoc(", code, fixed=TRUE)
+stopifnot(grepl("test_ensure_pandoc(", code, fixed=TRUE))
 run_case <- function(mode) {
   e <- new.env(parent=globalenv())
   e$downloads <- character()
@@ -30,30 +30,35 @@ run_case <- function(mode) {
   e$requireNamespace <- function(...) TRUE
   e$test_write <- function(...) invisible(NULL)
   e$file.exists <- function(...) TRUE
-  e$test_find <- function(cache=FALSE, dir=NULL) {
-    if (mode %in% c("mac_pkg", "mac_homebrew") &&
-        identical(dir, if (mode == "mac_pkg") "/usr/local/bin" else "/opt/homebrew/bin"))
-      return(list(version=numeric_version("3.6"), dir=dir))
-    if (e$pandoc_downloads || mode == "existing") list(version=numeric_version("3.6"), dir=tempdir())
-    else list(version=numeric_version("0"), dir=NULL)
-  }
-  e$test_latest <- function() if (e$pandoc_downloads) "3.6" else NULL
-  e$test_bin <- function(...) file.path(tempdir(), "pandoc.exe")
-  e$test_install_pandoc <- function(...) {
-    if (mode == "pandoc_failure") stop("Pandoc download blocked")
-    if (mode == "missing_helper") stop('could not find function "check_string"')
-    e$pandoc_downloads <- e$pandoc_downloads+1L
+  e$pandoc_calls <- 0L
+  e$test_ensure_pandoc <- function(root = getwd(), min_version = "2.8", ...) {
+    e$pandoc_calls <- e$pandoc_calls + 1L
+    stopifnot(identical(min_version, "2.8"))
+    found <- function(dir, source) list(ok=TRUE, dir=dir, version=numeric_version("3.6"), source=source, reason=NA_character_)
+    if (mode == "existing")      return(found(tempdir(), "existing"))
+    if (mode == "mac_pkg")       return(found("/usr/local/bin", "existing"))
+    if (mode == "mac_homebrew")  return(found("/opt/homebrew/bin", "existing"))
+    if (mode == "missing") { e$pandoc_downloads <- e$pandoc_downloads+1L; return(found(file.path(tempdir(), "3.11"), "downloaded")) }
+    if (mode == "pandoc_failure") return(list(ok=FALSE, dir=NULL, version=NULL, source=NA_character_, reason="Pandoc download failed: libcurl: proxy refused (403)"))
+    if (mode == "pandoc_offline") return(list(ok=FALSE, dir=NULL, version=NULL, source=NA_character_, reason="Pandoc not found and downloads are disabled (EU_SAE_PANDOC_OFFLINE=1)."))
+    if (mode == "missing_helper") stop("could not find function \"sae_ensure_pandoc\"")
+    found(tempdir(), "existing")
   }
   err <- tryCatch({eval(parse(text=code),e);NULL}, error=conditionMessage)
   expected_fail <- mode %in% c("download_failure","dll_block")
   stopifnot(!is.null(err) == expected_fail, "arrow" %in% e$downloads)
   if (expected_fail) stopifnot(grepl("Setup incomplete",err))
-  if (mode == "existing") stopifnot(e$pandoc_downloads == 0L)
-  if (mode %in% c("mac_pkg", "mac_homebrew")) stopifnot(e$pandoc_downloads == 0L)
-  if (mode %in% c("pandoc_failure", "missing_helper")) stopifnot(!is.null(e$pandoc_error))
-  if (mode == "missing") stopifnot(e$pandoc_downloads == 1L)
+  stopifnot(e$pandoc_calls == 1L)                      # exactly one Pandoc check per setup
+  if (mode == "existing") stopifnot(e$pandoc_downloads == 0L, is.null(e$pandoc_error))
+  if (mode %in% c("mac_pkg", "mac_homebrew")) stopifnot(e$pandoc_downloads == 0L, is.null(e$pandoc_error))
+  if (mode %in% c("pandoc_failure", "pandoc_offline", "missing_helper")) {
+    stopifnot(!is.null(e$pandoc_error))                # reported ...
+    stopifnot(is.null(err))                            # ... but never fatal
+  }
+  if (mode == "pandoc_failure") stopifnot(grepl("403", e$pandoc_error))   # underlying reason kept
+  if (mode == "missing") stopifnot(e$pandoc_downloads == 1L, is.null(e$pandoc_error))
   cat("PASS:",mode,"\n")
 }
 for (mode in c("existing","missing","download_failure","dll_block","pandoc_failure",
-               "missing_helper","mac_pkg","mac_homebrew")) run_case(mode)
+               "pandoc_offline","missing_helper","mac_pkg","mac_homebrew")) run_case(mode)
 
