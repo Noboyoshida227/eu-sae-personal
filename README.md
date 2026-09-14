@@ -5,10 +5,12 @@
 Install **R 4.2 or later** and run `install_packages.R` once to install the
 required packages. Use the newest R version that your organization has approved
 and made available; installing the absolute latest release is not required.
-For report rendering, install one free Pandoc provider: [RStudio
-Desktop](https://posit.co/download/rstudio-desktop/),
-[Quarto](https://quarto.org/docs/get-started/), or [standalone
-Pandoc](https://pandoc.org/installing.html). The `sf` package also needs its
+Report rendering needs Pandoc: the launcher reuses one already installed
+(RStudio Desktop, Quarto, Positron, Homebrew, or [standalone
+Pandoc](https://pandoc.org/installing.html)) and otherwise downloads a pinned,
+checksum-verified copy into your user profile on first run (no administrator
+rights). Without it the analysis still runs and the report is skipped; see
+`Start_Here/README.md`. The `sf` package also needs its
 platform-specific system libraries. Keep the launcher window open while using
 the application.
 
@@ -50,8 +52,8 @@ tables and labelled AI interpretations (when requested), with editable text and
 tables. Wide tables are arranged into readable panels with identifier columns
 repeated; single-record diagnostics use a field/value layout. Figures are
 embedded images. The HTML remains the interactive version, and Excel links need
-the adjacent `outputs/data/` folder. The Word export uses the same Pandoc already
-required for HTML, plus the R packages `xml2` and `zip` installed by
+the adjacent `outputs/data/` folder. The Word export uses the same Pandoc as the
+HTML report, plus the R packages `xml2` and `zip` installed by
 `install_packages.R`. A conversion failure is logged without discarding the HTML.
 If Word is missing, check the run log, resolve missing dependencies, and
 regenerate the report. Save a separate Word working copy before editing; later

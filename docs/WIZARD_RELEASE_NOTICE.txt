@@ -62,7 +62,9 @@ history conditions described in docs/RELEASE_CHECKLIST.md and
 docs/HISTORY_REMEDIATION.md still apply before public distribution.
 
 Both report formats include signed estimated-change and CI-width comparisons.
-Word text/tables are editable; figures are embedded images. Install one free
-Pandoc provider (RStudio Desktop, Quarto, or standalone Pandoc); xml2 and zip
-are also required for Word export. Conversion warnings preserve the completed HTML.
+Word text/tables are editable; figures are embedded images. Pandoc is reused
+if installed (RStudio Desktop, Quarto, Positron, standalone Pandoc) and otherwise
+downloaded once, checksum-verified, into the user profile; xml2 and zip
+are also required for Word export. Without Pandoc a run ends as "Analysis
+completed - report unavailable". Conversion warnings preserve the completed HTML.
 Generated reports and run histories remain excluded from the clean ZIP.

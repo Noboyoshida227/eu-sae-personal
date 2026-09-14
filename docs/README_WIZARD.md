@@ -28,10 +28,13 @@ approved and made available; the absolute latest R release is not required. On
 a managed computer, keep the approved R 4.2+ installation unless IT directs an
 upgrade.
 
-Report creation also needs Pandoc. Before the first run, install **one** free
-option: [RStudio Desktop](https://posit.co/download/rstudio-desktop/),
-[Quarto](https://quarto.org/docs/get-started/), or [standalone
-Pandoc](https://pandoc.org/installing.html). You do not need all three.
+Report creation also needs Pandoc. Nothing to install in advance: the launcher
+reuses a Pandoc that is already on the computer (RStudio Desktop, Quarto,
+Positron, Homebrew or [standalone Pandoc](https://pandoc.org/installing.html))
+and otherwise downloads a pinned, checksum-verified copy into your user profile
+the first time (26-42 MB, no administrator rights). Without internet access the
+analysis still runs and the run ends as *Analysis completed - report
+unavailable*; see `Start_Here/README.md`.
 
 On Windows, double-click:
 
@@ -177,8 +180,8 @@ replace current outputs; archived copies are retained under
 `app_runs/<timestamp>_<run_label>/outputs/`. Keep `outputs/data/` with the reports
 for Excel links. The clean distribution contains no generated reports.
 
-Both formats require Pandoc, supplied by any one of RStudio Desktop, Quarto, or
-a standalone Pandoc installation. Word formatting also requires `xml2` and
+Both formats require Pandoc, found or downloaded automatically as described
+above. Word formatting also requires `xml2` and
 `zip`, installed by `install_packages.R`. If Word is missing, inspect the run
 log, resolve the conversion warning, and regenerate; the completed HTML is
 retained.
