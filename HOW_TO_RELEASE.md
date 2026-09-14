@@ -24,11 +24,13 @@ anything in here.** If you want to change something, edit the manuscript and
 print a new copy.
 
 **GitHub — the shared, backed-up record.**
-`github.com/Noboyoshida227/eu-sae-application-package`
+`github.com/Noboyoshida227/eu-sae-personal`
 Every time you commit and push in GitHub Desktop, a snapshot of the package
-folder goes here. The release page on GitHub is where colleagues download the
-zip. Because each release records which commit it came from, anyone can look at
-GitHub later and see exactly what code was in any zip they received.
+folder goes here. The release page on GitHub,
+`github.com/Noboyoshida227/eu-sae-personal/releases`, is where colleagues
+download the zip; the repository is public, so the link works without a GitHub
+account. Because each release records which commit it came from, anyone can
+look at GitHub later and see exactly what code was in any zip they received.
 
 ---
 
@@ -102,7 +104,14 @@ About a minute.
 
 Every release is the same five moves.
 
-**1. Edit.** Change whatever you need in the package folder. Save.
+**1. Edit and test.** Change whatever you need in the package folder. Save.
+Then run the checks from PowerShell and make sure they all pass:
+```powershell
+Rscript tests\run_tests.R
+Rscript tests\test_startup.R
+Rscript tests\test_pandoc_bootstrap.R
+Rscript scripts\check_dependency_lock.R
+```
 
 **2. Stamp the new version.**
 ```powershell
@@ -128,11 +137,15 @@ powershell -ExecutionPolicy Bypass -File .\Release.ps1
 ```
 When it finishes, the zip is in `dist\EU_SAE_520_w6\`.
 
-**Then publish.** On GitHub: **Releases → Draft a new release**. In *Choose a
-tag* type `v5.2.0-rc.6-wizard.5.4-greece` and click *Create new tag on publish*.
-Paste your CHANGELOG section as the description, add the SHA-256 from
-`SHA256SUMS.txt`, attach the zip, tick *pre-release*, publish. Send colleagues
-the link.
+**Then publish.** `Release.ps1` ends by printing two `git tag` / `git push`
+lines with the commit filled in; run them (GitHub Desktop → Repository → Open in
+PowerShell, if `git` is not on your PATH). Then on GitHub:
+`github.com/Noboyoshida227/eu-sae-personal/releases` → **Draft a new release**.
+In *Choose a tag* pick `v5.2.0-rc.6-wizard.5.4-greece` (or type it and click
+*Create new tag on publish* if you skipped the tag step). Paste your CHANGELOG
+section as the description, add the one line from `SHA256SUMS.txt`, attach the
+zip, tick *pre-release*, publish. Send colleagues the release link, e.g.
+`github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.4-greece`.
 
 ---
 
@@ -179,6 +192,6 @@ window.
 ## Short release names
 
 `RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
-The current name is `EU_SAE_520_w5c`; the full version remains in `WIZARD_VERSION`.
+The current name is `EU_SAE_520_w5d`; the full version remains in `WIZARD_VERSION`.
 For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
 The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

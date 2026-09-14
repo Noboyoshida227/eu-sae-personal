@@ -92,6 +92,6 @@ delete. Nothing in them is needed to rebuild a release.
 ## Short release names
 
 `RELEASE_NAME` controls the local release folder, application folder, and ZIP basename.
-The current name is `EU_SAE_520_w5c`; the full version remains in `WIZARD_VERSION`.
+The current name is `EU_SAE_520_w5d`; the full version remains in `WIZARD_VERSION`.
 For the next build use `python tools/bump_version.py <new-version> --release-name <new-short-name>`.
 The builder refuses to overwrite an existing destination. Existing release archives are unchanged.

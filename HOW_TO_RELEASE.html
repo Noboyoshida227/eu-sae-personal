@@ -352,13 +352,14 @@ display: none;
 </div>
 
 
-<div id="how-to-revise-the-package-and-make-a-release" class="section level1">
+<section id="how-to-revise-the-package-and-make-a-release"
+class="level1">
 <h1>How to revise the package and make a release</h1>
 <p><em>A plain-language guide for the package maintainer. The compact
 technical rulebook is <code>docs/RELEASING.md</code>; this note explains
 the same process in everyday terms.</em></p>
 <hr />
-<div id="three-places-three-jobs" class="section level2">
+<section id="three-places-three-jobs" class="level2">
 <h2>1. Three places, three jobs</h2>
 <p>There are three places the package exists, and each has one job.</p>
 <p><strong>The package folder — where you edit.</strong>
@@ -373,21 +374,23 @@ These are printed copies of the manuscript, frozen on the day they were
 made. <strong>You never edit anything in here.</strong> If you want to
 change something, edit the manuscript and print a new copy.</p>
 <p><strong>GitHub — the shared, backed-up record.</strong>
-<code>github.com/Noboyoshida227/eu-sae-application-package</code> Every
-time you commit and push in GitHub Desktop, a snapshot of the package
-folder goes here. The release page on GitHub is where colleagues
-download the zip. Because each release records which commit it came
-from, anyone can look at GitHub later and see exactly what code was in
-any zip they received.</p>
+<code>github.com/Noboyoshida227/eu-sae-personal</code> Every time you
+commit and push in GitHub Desktop, a snapshot of the package folder goes
+here. The release page on GitHub,
+<code>github.com/Noboyoshida227/eu-sae-personal/releases</code>, is
+where colleagues download the zip; the repository is public, so the link
+works without a GitHub account. Because each release records which
+commit it came from, anyone can look at GitHub later and see exactly
+what code was in any zip they received.</p>
 <hr />
-</div>
-<div id="what-is-in-the-package-folder" class="section level2">
+</section>
+<section id="what-is-in-the-package-folder" class="level2">
 <h2>2. What is in the package folder</h2>
 <table>
 <colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -462,13 +465,16 @@ the CHANGELOG</td>
 </tbody>
 </table>
 <hr />
-</div>
-<div id="the-two-helper-programs" class="section level2">
+</section>
+<section id="the-two-helper-programs" class="level2">
 <h2>3. The two helper programs</h2>
 <p>Both are run from PowerShell, from inside the package folder. Open
 PowerShell and type this first, every time:</p>
-<pre class="powershell"><code>cd C:\Users\noboy\Repos\eu-sae-personal</code></pre>
-<div id="toolsbump_version.py-stamps-a-new-version-number-everywhere" class="section level3">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cd</span> C<span class="op">:</span>\Users\noboy\Repos\eu<span class="op">-</span>sae<span class="op">-</span>personal</span></code></pre></div>
+<section
+id="toolsbump_version.py-stamps-a-new-version-number-everywhere"
+class="level3">
 <h3><code>tools\bump_version.py</code> — stamps a new version number
 everywhere</h3>
 <p>The version number is written into about fifteen places: the app’s
@@ -476,7 +482,8 @@ title bar, the launchers, the tests, several notes, the text inside the
 slide deck and the guidelines note, and the <em>file names</em> of the
 two instruction documents. This program changes all of them in one go
 and regenerates the download-instructions PDF.</p>
-<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_520_w6</code></pre>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>python tools\bump_version<span class="op">.</span><span class="fu">py</span> 5<span class="op">.</span><span class="fu">2</span><span class="op">.</span><span class="fu">0</span><span class="op">-</span>rc<span class="op">.</span><span class="fu">6</span><span class="op">-</span>wizard<span class="op">.</span><span class="fu">5</span><span class="op">.</span><span class="fu">4</span><span class="op">-</span>greece <span class="op">--</span>release<span class="op">-</span>name EU_SAE_520_w6</span></code></pre></div>
 <p>The last part is the new version. Keep the pattern
 <code>5.2.0-rc.6-wizard.N-label</code>: increase <code>N</code> by one
 each release, and choose any short label (no spaces) that reminds you
@@ -484,14 +491,16 @@ what the round was about — <code>greece</code>, <code>bugfix</code>,
 <code>october</code>.</p>
 <p>It prints every file it touched. Add <code>--dry-run</code> at the
 end to see what it <em>would</em> change without changing anything.</p>
-</div>
-<div id="release.ps1-builds-the-release-folder-and-the-zip" class="section level3">
+</section>
+<section id="release.ps1-builds-the-release-folder-and-the-zip"
+class="level3">
 <h3><code>Release.ps1</code> — builds the release folder and the
 zip</h3>
-<pre class="powershell"><code>powershell -ExecutionPolicy Bypass -File .\Release.ps1</code></pre>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>powershell <span class="op">-</span>ExecutionPolicy Bypass <span class="op">-</span>File <span class="op">.</span>\Release<span class="op">.</span><span class="fu">ps1</span></span></code></pre></div>
 <p>It first checks four things and stops with a plain message if any is
 wrong:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>everything is committed in GitHub Desktop;</li>
 <li>this version has not been built before;</li>
 <li><code>docs\CHANGELOG.md</code> has a note for this version;</li>
@@ -502,20 +511,27 @@ the package copy, the zip, a checksum file, and
 <code>RELEASE_INFO.txt</code> naming the commit it was built from. About
 a minute.</p>
 <hr />
-</div>
-</div>
-<div id="the-revision-cycle" class="section level2">
+</section>
+</section>
+<section id="the-revision-cycle" class="level2">
 <h2>4. The revision cycle</h2>
 <p>Every release is the same five moves.</p>
-<p><strong>1. Edit.</strong> Change whatever you need in the package
-folder. Save.</p>
+<p><strong>1. Edit and test.</strong> Change whatever you need in the
+package folder. Save. Then run the checks from PowerShell and make sure
+they all pass:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Rscript tests\run_tests<span class="op">.</span><span class="fu">R</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>Rscript tests\test_startup<span class="op">.</span><span class="fu">R</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>Rscript tests\test_pandoc_bootstrap<span class="op">.</span><span class="fu">R</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>Rscript scripts\check_dependency_lock<span class="op">.</span><span class="fu">R</span></span></code></pre></div>
 <p><strong>2. Stamp the new version.</strong></p>
-<pre class="powershell"><code>python tools\bump_version.py 5.2.0-rc.6-wizard.5-greece --release-name EU_SAE_520_w6</code></pre>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>python tools\bump_version<span class="op">.</span><span class="fu">py</span> 5<span class="op">.</span><span class="fu">2</span><span class="op">.</span><span class="fu">0</span><span class="op">-</span>rc<span class="op">.</span><span class="fu">6</span><span class="op">-</span>wizard<span class="op">.</span><span class="fu">5</span><span class="op">.</span><span class="fu">4</span><span class="op">-</span>greece <span class="op">--</span>release<span class="op">-</span>name EU_SAE_520_w6</span></code></pre></div>
 <p><strong>3. Write down what changed.</strong> Open
 <code>docs\CHANGELOG.md</code> in any text editor and add a short
 section at the very top, under a heading that matches the version you
 just stamped:</p>
-<pre><code>## 5.2.0-rc.6-wizard.5-greece - 2026-09-10
+<pre><code>## 5.2.0-rc.6-wizard.5.4-greece - 2026-09-10
 
 - What you changed, and why, in a few lines. Write it for your colleagues;
   you will paste it into the GitHub release page.</code></pre>
@@ -523,18 +539,24 @@ just stamped:</p>
 every changed file. Write a one-line summary, click <strong>Commit to
 main</strong>, then <strong>Push origin</strong>.</p>
 <p><strong>5. Build.</strong></p>
-<pre class="powershell"><code>powershell -ExecutionPolicy Bypass -File .\Release.ps1</code></pre>
-<p>When it finishes, the zip is in
-<code>dist\EU_SAE_520_w6\</code>.</p>
-<p><strong>Then publish.</strong> On GitHub: <strong>Releases → Draft a
-new release</strong>. In <em>Choose a tag</em> type
-<code>v5.2.0-rc.6-wizard.5-greece</code> and click <em>Create new tag on
-publish</em>. Paste your CHANGELOG section as the description, add the
-SHA-256 from <code>SHA256SUMS.txt</code>, attach the zip, tick
-<em>pre-release</em>, publish. Send colleagues the link.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>powershell <span class="op">-</span>ExecutionPolicy Bypass <span class="op">-</span>File <span class="op">.</span>\Release<span class="op">.</span><span class="fu">ps1</span></span></code></pre></div>
+<p>When it finishes, the zip is in <code>dist\EU_SAE_520_w6\</code>.</p>
+<p><strong>Then publish.</strong> <code>Release.ps1</code> ends by
+printing two <code>git tag</code> / <code>git push</code> lines with the
+commit filled in; run them (GitHub Desktop → Repository → Open in
+PowerShell, if <code>git</code> is not on your PATH). Then on GitHub:
+<code>github.com/Noboyoshida227/eu-sae-personal/releases</code> →
+<strong>Draft a new release</strong>. In <em>Choose a tag</em> pick
+<code>v5.2.0-rc.6-wizard.5.4-greece</code> (or type it and click
+<em>Create new tag on publish</em> if you skipped the tag step). Paste
+your CHANGELOG section as the description, add the one line from
+<code>SHA256SUMS.txt</code>, attach the zip, tick <em>pre-release</em>,
+publish. Send colleagues the release link, e.g.
+<code>github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.4-greece</code>.</p>
 <hr />
-</div>
-<div id="things-that-come-up" class="section level2">
+</section>
+<section id="things-that-come-up" class="level2">
 <h2>5. Things that come up</h2>
 <p>**“dist_… already exists.”** You already built this version. If
 nobody has received it yet, delete that one folder and run
@@ -565,8 +587,8 @@ will tell you if they are missing.</p>
 <code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>
 once in that window.</p>
 <hr />
-</div>
-<div id="two-things-never-to-do" class="section level2">
+</section>
+<section id="two-things-never-to-do" class="level2">
 <h2>6. Two things never to do</h2>
 <ul>
 <li>Never edit anything inside <code>dist\</code>. Edit the package
@@ -574,8 +596,18 @@ folder and build again.</li>
 <li>Never rebuild a version that has already been sent to someone. Stamp
 a new one.</li>
 </ul>
-</div>
-</div>
+</section>
+<section id="short-release-names" class="level2">
+<h2>Short release names</h2>
+<p><code>RELEASE_NAME</code> controls the local release folder,
+application folder, and ZIP basename. The current name is
+<code>EU_SAE_520_w5d</code>; the full version remains in
+<code>WIZARD_VERSION</code>. For the next build use
+<code>python tools/bump_version.py &lt;new-version&gt; --release-name &lt;new-short-name&gt;</code>.
+The builder refuses to overwrite an existing destination. Existing
+release archives are unchanged.</p>
+</section>
+</section>
 
 
 
