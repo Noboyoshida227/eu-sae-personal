@@ -770,13 +770,19 @@ enrich_diagnostics_from_output <- function(output_df, yr, model_type = "UFH") {
     paste0("\"", gsub("\"", "\\\\\"", gsub("\\\\", "\\\\\\\\", as.character(x))), "\"")
   }
   wrapper_path <- tempfile(pattern = paste0("sae_step_", step, "_"), fileext = ".R")
+  # The sentinel line is printed only if source() returns, i.e. the step script
+  # ran to its last statement without an R error. It lets the parent tell a
+  # genuine script failure apart from an R process that finished the work and
+  # then died while shutting down (DLL unload, finalizer, device close), which
+  # on some Windows machines yields a non-zero exit status with no error text.
   writeLines(
     c(
       "options(warn = 1)",
       sprintf("Sys.setenv(SAE_APP_CONFIG = %s, SAE_APP_STEP = %s)",
               r_literal(config_path), r_literal(step)),
       sprintf("source(%s, local = new.env(parent = globalenv()))",
-              r_literal(script_path))
+              r_literal(script_path)),
+      sprintf('cat("\\n%s\\n")', .pipeline_step_sentinel(step))
     ),
     con = wrapper_path,
     useBytes = TRUE
@@ -801,14 +807,36 @@ enrich_diagnostics_from_output <- function(output_df, yr, model_type = "UFH") {
   status <- attr(output, "status")
   if (is.null(status)) status <- 0L
   status <- as.integer(status)
+  exit_status <- status
+  completed <- any(grepl(.pipeline_step_sentinel(step), as.character(output), fixed = TRUE))
+  halted <- any(grepl("^Execution halted|^Error", trimws(as.character(output))))
+  shutdown_failure <- status != 0L && !identical(status, 124L) && completed && !halted
+  if (shutdown_failure) {
+    # Work is done; only the R child's shutdown went wrong. Continue, but say so.
+    status <- 0L
+  }
   child_log_path <- .pipeline_log_child_summary(step, output, status, logger = logger)
+  if (shutdown_failure) {
+    logger(sprintf(paste(
+      "[%s] Warning: the step finished and wrote its outputs, but its R process exited with",
+      "status %d while shutting down (no R error was reported). Continuing with the results.",
+      "This is a problem with R's exit on this computer, not with the analysis; see %s."),
+      step, exit_status, child_log_path %||% "the step log"))
+  }
 
   list(
     status = status,
+    exit_status = exit_status,
+    completed = completed,
     output = as.character(output),
     child_log_path = child_log_path,
-    timed_out = identical(status, 124L)
+    timed_out = identical(exit_status, 124L)
   )
+}
+
+# Text the step wrapper prints after the step script has run to completion.
+.pipeline_step_sentinel <- function(step) {
+  sprintf("[SAE_STEP_COMPLETE] %s", step)
 }
 
 .pipeline_clean_outputs <- function(logger = message) {

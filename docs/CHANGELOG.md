@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.5 - 2026-09-14
+
+- Pipeline steps no longer fail when the step's R process finishes its work but exits with a non-zero status while shutting down (seen on a Windows laptop as `Step 'UFH' failed with exit status 255` with a complete child log and no R error). The step wrapper now prints a completion sentinel after the script has run to its end; if the sentinel is present and no `Error`/`Execution halted` line was printed, the run continues and the run log records a warning with the original exit status. A genuine script error or an early `quit()` still fails the step as before.
+- New dev-only test `tests/test_step_runner.R`.
+- No change to statistical calculations, MCPE defaults or the Pandoc handling introduced in wizard.5.4.
+
 ## 5.2.0-rc.6-wizard.5.4 - 2026-09-14
 
 - Pandoc is now obtained without the CRAN `pandoc`/`gh` packages. `R/pandoc_bootstrap.R` (base R only) reuses an existing Pandoc >= 2.8 (RStudio, Positron or Quarto bundles, PATH, Homebrew, the pandoc.org installer, or an earlier download) and otherwise downloads the pinned Pandoc 3.11 release for the platform into the user's R cache folder. Extraction happens only after the SHA-256 is computed and matches the pinned digest; the download timeout is bounded (`EU_SAE_PANDOC_TIMEOUT`, default 600 s) and a failed download is not retried within the same session. Fixes the macOS startup failure `could not find function "check_string"` (gh >= 1.6.0 with rlang < 1.2.0).
