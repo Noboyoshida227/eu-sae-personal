@@ -71,7 +71,7 @@ This program changes all of them in one go and regenerates the
 download-instructions PDF.
 
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5.5-greece --release-name EU_SAE_520_w6
+python tools\bump_version.py 5.2.0-rc.6-wizard.5.6-greece --release-name EU_SAE_520_w6
 ```
 
 The last part is the new version. Keep the pattern `5.2.0-rc.6-wizard.N-label`:
@@ -115,14 +115,14 @@ Rscript scripts\check_dependency_lock.R
 
 **2. Stamp the new version.**
 ```powershell
-python tools\bump_version.py 5.2.0-rc.6-wizard.5.5-greece --release-name EU_SAE_520_w6
+python tools\bump_version.py 5.2.0-rc.6-wizard.5.6-greece --release-name EU_SAE_520_w6
 ```
 
 **3. Write down what changed.** Open `docs\CHANGELOG.md` in any text editor
 and add a short section at the very top, under a heading that matches the
 version you just stamped:
 ```
-## 5.2.0-rc.6-wizard.5.5-greece - 2026-09-10
+## 5.2.0-rc.6-wizard.5.6-greece - 2026-09-10
 
 - What you changed, and why, in a few lines. Write it for your colleagues;
   you will paste it into the GitHub release page.
@@ -141,11 +141,11 @@ When it finishes, the zip is in `dist\EU_SAE_520_w6\`.
 lines with the commit filled in; run them (GitHub Desktop → Repository → Open in
 PowerShell, if `git` is not on your PATH). Then on GitHub:
 `github.com/Noboyoshida227/eu-sae-personal/releases` → **Draft a new release**.
-In *Choose a tag* pick `v5.2.0-rc.6-wizard.5.5-greece` (or type it and click
+In *Choose a tag* pick `v5.2.0-rc.6-wizard.5.6-greece` (or type it and click
 *Create new tag on publish* if you skipped the tag step). Paste your CHANGELOG
 section as the description, add the one line from `SHA256SUMS.txt`, attach the
 zip, tick *pre-release*, publish. Send colleagues the release link, e.g.
-`github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.5-greece`.
+`github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.6-greece`.
 
 ---
 

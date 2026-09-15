@@ -10,7 +10,7 @@ Thank you for the tests on w5d. A new version, **w5e**, is ready and I would lik
 - Nothing else changed: the statistical calculations and the Pandoc handling introduced in w5d are as before.
 
 **Where to get it.**
-https://github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.5 – download **EU_SAE_520_w5e.zip** under "Assets".
+https://github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.6 – download **EU_SAE_520_w5e.zip** under "Assets".
 SHA-256: `<paste the line from dist\EU_SAE_520_w5e\SHA256SUMS.txt>`
 
 **Please do this.**
