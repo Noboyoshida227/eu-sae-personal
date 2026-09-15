@@ -23,6 +23,9 @@ Rplots.pdf
 # ---- Local-only Pandoc copy (see R/pandoc_bootstrap.R; never released) ----
 tools/pandoc/
 
+# ---- Personal scratch folder (never part of a release) ----
+Claude outputs/
+
 # ---- Run logs ----
 app_runs/
 

@@ -352,9 +352,41 @@ display: none;
 </div>
 
 
-<div id="changelog" class="section level1">
+<section id="changelog" class="level1">
 <h1>Changelog</h1>
-<div id="rc.6-wizard.5.4---2026-09-14" class="section level2">
+<section id="rc.6-wizard.5.5---2026-09-14" class="level2">
+<h2>5.2.0-rc.6-wizard.5.5 - 2026-09-14</h2>
+<ul>
+<li>Pipeline steps no longer fail when the step’s R process finishes its
+work but exits with a non-zero status while shutting down (seen on a
+Windows laptop as <code>Step 'UFH' failed with exit status 255</code>
+with a complete child log and no R error). The step wrapper now prints a
+completion sentinel after the script has run to its end; if the sentinel
+is present and no <code>Error</code>/<code>Execution halted</code> line
+was printed, the run continues and the run log records a warning with
+the original exit status. A genuine script error or an early
+<code>quit()</code> still fails the step as before.</li>
+<li>Data Readiness: the “Auxiliary Covariate Summary” table now reports
+the mean, standard error, number of domains and correlation with the
+target indicator for each analysis year separately, followed by an “All
+years” row that pools every domain-year observation (the former
+single-row figure). Within-year correlations describe cross-domain
+association at a point in time; the pooled row also reflects
+between-year movement.
+<code>outputs/tables/aux_covariate_summary.csv</code> gains a
+<code>year</code> column.</li>
+<li>Poverty maps in the report
+(<code>outputs/figures/poverty_maps/</code>, Direct / UFH / MFH by year)
+now use a reversed magma scale: lighter colours for lower poverty rates,
+darker colours for higher rates, matching the MFH level maps. The
+report’s “Poverty Maps” section states this convention. RMSE, change and
+growth-rate maps are unchanged.</li>
+<li>New dev-only test <code>tests/test_step_runner.R</code>.</li>
+<li>No change to statistical calculations, MCPE defaults or the Pandoc
+handling introduced in wizard.5.4.</li>
+</ul>
+</section>
+<section id="rc.6-wizard.5.4---2026-09-14" class="level2">
 <h2>5.2.0-rc.6-wizard.5.4 - 2026-09-14</h2>
 <ul>
 <li>Pandoc is now obtained without the CRAN
@@ -367,7 +399,7 @@ user’s R cache folder. Extraction happens only after the SHA-256 is
 computed and matches the pinned digest; the download timeout is bounded
 (<code>EU_SAE_PANDOC_TIMEOUT</code>, default 600 s) and a failed
 download is not retried within the same session. Fixes the macOS startup
-failure <code>could not find function &quot;check_string&quot;</code> (gh &gt;=
+failure <code>could not find function "check_string"</code> (gh &gt;=
 1.6.0 with rlang &lt; 1.2.0).</li>
 <li>A missing Pandoc no longer stops the launcher and no longer fails a
 run. The dashboard finishes as “Analysis completed - report
@@ -391,8 +423,8 @@ pinning and the skipped-report status.</li>
 (local only; the release builder does not include it). Statistical
 calculations and MCPE defaults are unchanged from w5c.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.5.3---2026-09-13" class="section level2">
+</section>
+<section id="rc.6-wizard.5.3---2026-09-13" class="level2">
 <h2>5.2.0-rc.6-wizard.5.3 - 2026-09-13</h2>
 <ul>
 <li>Included the Windows startup fix in the complete EU_SAE_520_w5c.zip;
@@ -406,8 +438,8 @@ wizard; save startup_setup.log for troubleshooting.</li>
 <li>Statistical calculations and MCPE defaults are unchanged from w5b.
 Network or device policy can still prevent dependency installation.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.5.2---2026-09-12" class="section level2">
+</section>
+<section id="rc.6-wizard.5.2---2026-09-12" class="level2">
 <h2>5.2.0-rc.6-wizard.5.2 - 2026-09-12</h2>
 <ul>
 <li>Removed dots from the release folder and ZIP basename:
@@ -418,8 +450,8 @@ and hyphens, preventing dotted package names in future builds.</li>
 <li>Full version identifiers remain inside the package. Statistical
 analysis code is unchanged.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.5.1---2026-09-12" class="section level2">
+</section>
+<section id="rc.6-wizard.5.1---2026-09-12" class="level2">
 <h2>5.2.0-rc.6-wizard.5.1 - 2026-09-12</h2>
 <ul>
 <li>Final short-name package: <code>EU_SAE_5.2.0_w5a.zip</code>,
@@ -430,8 +462,8 @@ committed.</li>
 <li>Includes the shorter-name release workflow from wizard.5;
 statistical analysis code remains unchanged.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.5---2026-09-12" class="section level2">
+</section>
+<section id="rc.6-wizard.5---2026-09-12" class="level2">
 <h2>5.2.0-rc.6-wizard.5 - 2026-09-12</h2>
 <ul>
 <li>Shortened the distributable ZIP to <code>EU_SAE_5.2.0_w5.zip</code>
@@ -446,8 +478,8 @@ short names.</li>
 <li>Packaging-only release: no changes to statistical estimation or
 analysis settings.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.4-crossplatform---2026-09-01" class="section level2">
+</section>
+<section id="rc.6-wizard.4-crossplatform---2026-09-01" class="level2">
 <h2>5.2.0-rc.6-wizard.4-crossplatform - 2026-09-01</h2>
 <ul>
 <li>Added macOS/Linux launchers
@@ -482,8 +514,9 @@ version to every file and filename that embeds it;
 names the release folder by version, requires a CHANGELOG entry, and
 records the commit. See <code>docs/RELEASING.md</code>.</li>
 </ul>
-</div>
-<div id="august-2026-report-formats-and-documentation" class="section level2">
+</section>
+<section id="august-2026-report-formats-and-documentation"
+class="level2">
 <h2>27 August 2026 — report formats and documentation</h2>
 <ul>
 <li>Added editable Word reports alongside HTML, without recomputing
@@ -497,8 +530,8 @@ conversion warnings.</li>
 <li>Clarified that dispersion across estimated changes is not prediction
 MSE.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.3-pointwise---2026-08-25" class="section level2">
+</section>
+<section id="rc.6-wizard.3-pointwise---2026-08-25" class="level2">
 <h2>5.2.0-rc.6-wizard.3-pointwise - 2026-08-25</h2>
 <ul>
 <li>retained raw pointwise, BH-adjusted, and Bonferroni-adjusted
@@ -535,8 +568,8 @@ model; and</li>
 documentation to state the corrected default and conditional MFH3
 procedure.</li>
 </ul>
-</div>
-<div id="rc.6-wizard.2-pointwise---2026-08-24" class="section level2">
+</section>
+<section id="rc.6-wizard.2-pointwise---2026-08-24" class="level2">
 <h2>5.2.0-rc.6-wizard.2-pointwise - 2026-08-24</h2>
 <ul>
 <li>made the Molina-Romero MFH3/MFH2 sequence the default model
@@ -556,8 +589,9 @@ and</li>
 covariance-repair counts, and explicit assurance status to the final
 report and CSV outputs.</li>
 </ul>
-</div>
-<div id="post-5.2.0-rc.6-working-revision---2026-08-24" class="section level2">
+</section>
+<section id="post-5.2.0-rc.6-working-revision---2026-08-24"
+class="level2">
 <h2>Post-5.2.0-rc.6 working revision - 2026-08-24</h2>
 <ul>
 <li>simplified <code>sm_out</code> for UFH and MFH: a missing/non-finite
@@ -578,8 +612,8 @@ and</li>
 transition output so a run produces one combined human-readable
 report.</li>
 </ul>
-</div>
-<div id="rc.6---2026-08-23" class="section level2">
+</section>
+<section id="rc.6---2026-08-23" class="level2">
 <h2>5.2.0-rc.6 - 2026-08-23</h2>
 <ul>
 <li>deferred the only <code>final_report.html</code> render until
@@ -601,8 +635,8 @@ a warning-only numeric-provenance check; and</li>
 partial- failure, secret-redaction, metadata persistence, and
 hostile-HTML cases.</li>
 </ul>
-</div>
-<div id="rc.5---2026-08-23" class="section level2">
+</section>
+<section id="rc.5---2026-08-23" class="level2">
 <h2>5.2.0-rc.5 - 2026-08-23</h2>
 <ul>
 <li>corrected the <code>msae::eblupMFH3</code> compatibility patch so
@@ -622,8 +656,8 @@ and</li>
 <li>hardened wizard clean-manifest exclusions and expanded regression
 and option- matrix coverage for the corrected behavior.</li>
 </ul>
-</div>
-<div id="rc.4---2026-08-21" class="section level2">
+</section>
+<section id="rc.4---2026-08-21" class="level2">
 <h2>5.2.0-rc.4 - 2026-08-21</h2>
 <ul>
 <li>changed the primary domain-change decision rule and figure coloring
@@ -659,8 +693,8 @@ download instructions, dashboard guide, and technical-note version
 statements; and</li>
 <li>corrected the dashboard guide’s title and contributor metadata.</li>
 </ul>
-</div>
-<div id="rc.3---2026-08-21" class="section level2">
+</section>
+<section id="rc.3---2026-08-21" class="level2">
 <h2>5.2.0-rc.3 - 2026-08-21</h2>
 <ul>
 <li>added a structured MFH numerical-diagnostics export and persisted
@@ -679,8 +713,8 @@ instructions, and dashboard guide; and</li>
 <li>moved exact condition-number calculation off the successful Cholesky
 path.</li>
 </ul>
-</div>
-<div id="rc.2---2026-08-21" class="section level2">
+</section>
+<section id="rc.2---2026-08-21" class="level2">
 <h2>5.2.0-rc.2 - 2026-08-21</h2>
 <ul>
 <li>scoped the MIT grant to software source code and added rights,
@@ -699,8 +733,8 @@ workflow;</li>
 <li>fixed root-manifest self-inclusion and excluded stale local
 diagnostics from the clean release.</li>
 </ul>
-</div>
-<div id="rc.1---2026-08-21" class="section level2">
+</section>
+<section id="rc.1---2026-08-21" class="level2">
 <h2>5.2.0-rc.1 - 2026-08-21</h2>
 <p>Revision candidate based on the exact <code>v5.1.0</code> release
 commit <code>cd04d479e0484ae98e3ef8299db29ac1f0f944b7</code>.</p>
@@ -735,8 +769,8 @@ clean release builder.</li>
 <p>This is a release candidate, not an approved production release. See
 <code>docs/REVISION_STATUS.md</code> and
 <code>docs/RELEASE_CHECKLIST.md</code>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
 

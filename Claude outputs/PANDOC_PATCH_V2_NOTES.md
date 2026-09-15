@@ -17,7 +17,7 @@ tree of `C:\Users\noboy\Repos\eu-sae-personal` (uncommitted) and are also in
 | `tests/test_pandoc_bootstrap.R` | new | 28 checks, no network: override/cache/package-local precedence, minimum version, offline, success, NA checksum, mismatch, download failure + single attempt, extraction failure, unrunnable executable, timeout bounds, real SHA-256 helper, rmarkdown pinning, and the skipped-report status of `render_final_report()`. |
 | `scripts/release_inventory.csv` | modified | adds `R/pandoc_bootstrap.R` (tests stay dev-only, like `test_startup.R`). |
 | `.gitignore` | modified | ignores `tools/pandoc/`. |
-| `docs/CHANGELOG.md` | modified | entry for `5.2.0-rc.6-wizard.5.4` (run `python tools\bump_version.py 5.2.0-rc.6-wizard.5.4` before `Release.ps1`). |
+| `docs/CHANGELOG.md` | modified | entry for `5.2.0-rc.6-wizard.5.5` (run `python tools\bump_version.py 5.2.0-rc.6-wizard.5.5` before `Release.ps1`). |
 | `docs/RELEASE_CHECKLIST.md` | modified | adds the two test scripts and a no-Pandoc / offline smoke test. |
 | `Start_Here/README.md` | modified | Review #5 and wording: macOS 15 route first; managed-device caveat; Pandoc paragraph; offline = `EU_SAE_PANDOC` or pandoc.org install. No "bypass" claims. |
 | `Start_Here/Start_Wizard.command`, `Start_Dashboard.command` | modified | write `startup_setup.log` like the `.bat` files; header points to Open Anyway. |
@@ -30,12 +30,12 @@ under `dist\` was touched, and `dist\EU_SAE_520_w5c\` still holds the frozen
 w5c copy and zip. The new `R/pandoc_bootstrap.R` is listed in
 `scripts/release_inventory.csv`, so `Release.ps1` -> `build_clean_release.R`
 will copy it into `dist\<RELEASE_NAME>\<RELEASE_NAME>\R\` and the zip. The
-CHANGELOG heading is `## 5.2.0-rc.6-wizard.5.4`; if you stamp a different label
+CHANGELOG heading is `## 5.2.0-rc.6-wizard.5.5`; if you stamp a different label
 with `bump_version.py`, rename that heading to match (Release.ps1 and
 run_tests.R both check it). Suggested:
 
 ```
-python tools\bump_version.py 5.2.0-rc.6-wizard.5.4 --release-name EU_SAE_520_w5d
+python tools\bump_version.py 5.2.0-rc.6-wizard.5.5 --release-name EU_SAE_520_w5d
 ```
 
 Not done, deliberately: a "render the report again" button (review #2, optional).

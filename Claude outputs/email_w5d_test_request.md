@@ -9,7 +9,7 @@ Thank you all for the testing so far, and for the logs and screenshots – they 
 **What changed in w5d.** The app now looks for a Pandoc that is already on the computer (for example the one bundled with RStudio) and, if there is none, downloads one verified copy into your own user profile the first time a report is needed (about 40 MB, no administrator rights). If that download is blocked by the network, the analysis still runs to the end: the run finishes with the status "Analysis completed – report unavailable", the Excel results (including the MFH tables under `outputs/data/`) are kept, and the log says why the report was skipped. The launchers on both systems now write a `startup_setup.log` file that tells us what happened.
 
 **Where to get it.**
-https://github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.4 – download **EU_SAE_520_w5d.zip** under "Assets" at the bottom of that page.
+https://github.com/Noboyoshida227/eu-sae-personal/releases/tag/v5.2.0-rc.6-wizard.5.5 – download **EU_SAE_520_w5d.zip** under "Assets" at the bottom of that page.
 
 If you want to check the download, its SHA-256 fingerprint is
 `8a7a96773dd2dbbd35a4a9319580f6e4934cba3bcf614d7b5bb7edd6d65da614`
