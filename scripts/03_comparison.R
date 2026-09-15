@@ -1317,7 +1317,10 @@ plot_poverty_map <- function(col_name, method_label, year_val) {
     )
   ggplot(map_sf) +
     geom_sf(aes(fill = value), color = NA) +
-    scale_fill_viridis_c(option = "magma", labels = label_number(accuracy = 0.01), na.value = "grey90") +
+    # direction = -1 reverses magma so that low rates are light (pale yellow)
+    # and high rates are dark; the same convention as the MFH level maps.
+    scale_fill_viridis_c(option = "magma", direction = -1,
+                         labels = label_number(accuracy = 0.01), na.value = "grey90") +
     labs(caption = sae_map_caption(.map_attribution), 
       title = paste0(method_label, " -- ", year_val),
       fill = "Rate"

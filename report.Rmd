@@ -551,6 +551,10 @@ cat(comparison_ai_section_html(ai_state, "precision",
 
 ## Poverty Maps
 
+Maps of the estimated poverty rates by domain and year. Lighter areas indicate
+lower poverty rates; darker areas indicate higher rates. Domains without an
+estimate are shown in grey.
+
 ```{r poverty-maps, results='asis'}
 map_files <- list.files(file.path(fig_dir, "poverty_maps"),
                         pattern = "\\.png$", full.names = FALSE)
