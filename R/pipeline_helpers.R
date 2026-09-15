@@ -682,3 +682,76 @@ sae_map_caption <- function(boundary, caption = NULL) {
   if (!length(parts)) return(NULL)
   paste(parts, collapse = "\n")
 }
+
+# ------------------------------------------------------------
+# MFH coefficient table (used by 03_comparison.R)
+# ------------------------------------------------------------
+# `estcoef` is the stacked coefficient matrix of an msae MFH fit (one block of
+# rows per period, columns beta / std.error / t.statistics / p.value).
+# msae labels the rows with the design-matrix column names; the robust MFH2
+# refit used to return the matrix without rownames, which made the previous
+# inline data.frame() call fail with "arguments imply differing number of
+# rows".  This helper derives the term labels from the formulas when the
+# rownames are missing, takes the year from the formula name or, failing
+# that, from `years`, and returns NULL (never an error) when the matrix
+# cannot be split consistently, so the comparison step degrades to a note
+# instead of stopping the run.
+sae_signif_stars <- function(p) {
+  p <- suppressWarnings(as.numeric(p))
+  out <- rep("", length(p))
+  out[!is.na(p) & p < 0.1]   <- "."
+  out[!is.na(p) & p < 0.05]  <- "*"
+  out[!is.na(p) & p < 0.01]  <- "**"
+  out[!is.na(p) & p < 0.001] <- "***"
+  out
+}
+
+sae_mfh_coef_table <- function(estcoef, formulas, years, method = "MFH") {
+  if (is.null(estcoef) || !is.matrix(estcoef) || nrow(estcoef) == 0L) return(NULL)
+  if (is.null(formulas) || length(formulas) == 0L) return(NULL)
+  needed <- c("beta", "std.error", "t.statistics", "p.value")
+  if (!all(needed %in% colnames(estcoef))) return(NULL)
+
+  term_labels <- lapply(formulas, function(f) {
+    tt <- stats::terms(f)
+    labs <- attr(tt, "term.labels")
+    if (isTRUE(attr(tt, "intercept") == 1L)) c("(Intercept)", labs) else labs
+  })
+  n_per_period <- vapply(term_labels, length, integer(1))
+  if (sum(n_per_period) != nrow(estcoef)) return(NULL)
+
+  formula_names <- names(formulas)
+  years <- suppressWarnings(as.integer(years))
+  rows <- vector("list", length(formulas))
+  start <- 1L
+  for (t in seq_along(formulas)) {
+    end <- start + n_per_period[[t]] - 1L
+    ec  <- estcoef[start:end, , drop = FALSE]
+    yr <- NA_integer_
+    if (!is.null(formula_names) && !is.na(formula_names[[t]]) &&
+        grepl("[0-9]{4}$", formula_names[[t]])) {
+      yr <- suppressWarnings(as.integer(sub("^.*?([0-9]{4})$", "\\1", formula_names[[t]])))
+    }
+    if (is.na(yr) && length(years) >= t) yr <- years[[t]]
+    terms_t <- rownames(ec)
+    if (is.null(terms_t) || length(terms_t) != nrow(ec) || any(!nzchar(terms_t))) {
+      terms_t <- term_labels[[t]]
+    }
+    rows[[t]] <- data.frame(
+      Method    = rep(as.character(method), nrow(ec)),
+      Year      = rep(yr, nrow(ec)),
+      Term      = terms_t,
+      Estimate  = as.numeric(ec[, "beta"]),
+      Std.Error = as.numeric(ec[, "std.error"]),
+      z.value   = as.numeric(ec[, "t.statistics"]),
+      p.value   = as.numeric(ec[, "p.value"]),
+      Signif    = sae_signif_stars(ec[, "p.value"]),
+      check.names = FALSE,
+      stringsAsFactors = FALSE
+    )
+    start <- end + 1L
+  }
+  out <- do.call(rbind, rows)
+  rownames(out) <- NULL
+  out
+}

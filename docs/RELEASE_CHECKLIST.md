@@ -27,7 +27,7 @@ candidate label to a production version.
 - [ ] At least one managed-environment test uses an organization-approved R
       4.2+ version that is not the newest available R release.
 - [ ] `Rscript tests/run_tests.R` passes in the release environment.
-- [ ] `Rscript tests/test_startup.R` and `Rscript tests/test_pandoc_bootstrap.R` pass.
+- [ ] `Rscript tests/test_startup.R`, `Rscript tests/test_pandoc_bootstrap.R`, `Rscript tests/test_step_runner.R` and `Rscript tests/test_mfh_coef_table.R` pass.
 - [ ] One Windows and one macOS machine without RStudio, Quarto or Pandoc start the wizard and finish a run with the report rendered (first-run Pandoc download), and one offline run finishes as "Analysis completed - report unavailable".
 - [ ] `Rscript scripts/check_dependency_lock.R` passes.
 - [ ] `docs/CHANGELOG.md` has an entry for this `WIZARD_VERSION`.

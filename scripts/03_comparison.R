@@ -1027,32 +1027,18 @@ kable(
 .mfh_fit <- if (is.list(selected_mfh_model) && !.mfh_not_executed) selected_mfh_model$fit else NULL
 .estcoef <- if (is.list(.mfh_fit)) .mfh_fit$estcoef else NULL
 
-if (!is.null(.estcoef) && is.matrix(.estcoef)) {
-  # Split stacked coefficients by time period
-  .n_per_period <- sapply(mfh_formula, function(f) {
-    length(attr(terms(f), "term.labels")) + 1L
-  })
-  .mfh_rows <- list()
-  .start <- 1L
-  for (.t in seq_along(mfh_formula)) {
-    .end <- .start + .n_per_period[.t] - 1L
-    .ec  <- .estcoef[.start:.end, , drop = FALSE]
-    .yr  <- sub("^.*?(\\d{4})$", "\\1", names(mfh_formula)[.t])
-    .mfh_rows[[.t]] <- data.frame(
-      Method    = diag_model,
-      Year      = as.integer(.yr),
-      Term      = rownames(.ec),
-      Estimate  = .ec[, "beta"],
-      Std.Error = .ec[, "std.error"],
-      z.value   = .ec[, "t.statistics"],
-      p.value   = .ec[, "p.value"],
-      Signif    = .signif_stars(.ec[, "p.value"]),
-      check.names = FALSE
-    )
-    .start <- .end + 1L
-  }
-  mfh_coef_tbl <- do.call(rbind, .mfh_rows)
+# sae_mfh_coef_table() splits the stacked coefficient matrix by period. It
+# derives the term labels from the formulas when the fit carries no rownames
+# (the robust MFH2 refit used to return such a matrix) and returns NULL rather
+# than erroring when the matrix cannot be split consistently.
+mfh_coef_tbl <- sae_mfh_coef_table(
+  estcoef  = .estcoef,
+  formulas = mfh_formula,
+  years    = years_keep,
+  method   = diag_model
+)
 
+if (!is.null(mfh_coef_tbl)) {
   kable(
     mfh_coef_tbl,
     digits    = c(0, 0, 0, 6, 6, 3, 4, 0),

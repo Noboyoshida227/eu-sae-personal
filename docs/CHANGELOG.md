@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.2.0-rc.6-wizard.5.6 - 2026-09-15
+
+- Comparison step: the run no longer fails with `arguments imply differing number of rows` when the selected MFH2 model came from the robust optim() refit (used when msae's `eblupMFH2()` returns a zero random-effect variance, as with the Greek NUTS3 data). The refit's coefficient matrix now carries the design-matrix term names like msae's, and the coefficient table in `03_comparison.R` is built by the new `sae_mfh_coef_table()` helper, which derives the term labels from the model formulas if they are missing and prints a note instead of stopping when the matrix cannot be split.
+- New dev-only test `tests/test_mfh_coef_table.R` (17 checks) covering the helper and the labelled robust refit.
+- No change to estimates, MSEs or model selection: the affected code only labels the coefficient table.
+
 ## 5.2.0-rc.6-wizard.5.5 - 2026-09-14
 
 - Pipeline steps no longer fail when the step's R process finishes its work but exits with a non-zero status while shutting down (seen on a Windows laptop as `Step 'UFH' failed with exit status 255` with a complete child log and no R error). The step wrapper now prints a completion sentinel after the script has run to its end; if the sentinel is present and no `Error`/`Execution halted` line was printed, the run continues and the run log records a warning with the original exit status. A genuine script error or an early `quit()` still fails the step as before.

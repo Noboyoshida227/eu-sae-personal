@@ -204,6 +204,14 @@
   pv    <- 2 * pnorm(abs(t.val), lower.tail = FALSE)
   coef  <- cbind(beta, se.b, t.val, pv)
   colnames(coef) <- c("beta", "std.error", "t.statistics", "p.value")
+  # msae::eblupMFH2() obtains Qh with solve(), which keeps the design-matrix
+  # column names, so its estcoef rows are labelled "(Intercept)", "x1", ...
+  # chol2inv()/MASS::ginv() drop dimnames, so restore the labels explicitly:
+  # 03_comparison.R reads rownames(estcoef) as the coefficient-table terms.
+  .term_names <- colnames(x.matrix)
+  if (!is.null(.term_names) && length(.term_names) == nrow(coef)) {
+    rownames(coef) <- .term_names
+  }
 
   # MSE: g1 + g2 + 2*g3
   d_proj <- kronecker(Id, I_n) - GI %*% Omega
@@ -285,8 +293,14 @@
   if (!requireNamespace("magic", quietly = TRUE)) {
     stop(".eblupMFH2_optim_refit: package 'magic' is required (msae uses it for adiag).")
   }
-  x.matrix <- Reduce(magic::adiag,
-                     lapply(formula, function(f) model.matrix(f, data_complete)))
+  x.blocks <- lapply(formula, function(f) model.matrix(f, data_complete))
+  x.matrix <- Reduce(magic::adiag, x.blocks)
+  # adiag() is expected to concatenate the per-period column names; make
+  # sure they are present whatever the magic version does with dimnames.
+  .x_colnames <- unlist(lapply(x.blocks, colnames), use.names = FALSE)
+  if (is.null(colnames(x.matrix)) && length(.x_colnames) == ncol(x.matrix)) {
+    colnames(x.matrix) <- .x_colnames
+  }
   n <- nrow(data_complete)
   y.var <- sapply(formula, "[[", 2)
 
