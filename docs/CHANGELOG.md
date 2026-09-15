@@ -3,6 +3,7 @@
 ## 5.2.0-rc.6-wizard.5.5 - 2026-09-14
 
 - Pipeline steps no longer fail when the step's R process finishes its work but exits with a non-zero status while shutting down (seen on a Windows laptop as `Step 'UFH' failed with exit status 255` with a complete child log and no R error). The step wrapper now prints a completion sentinel after the script has run to its end; if the sentinel is present and no `Error`/`Execution halted` line was printed, the run continues and the run log records a warning with the original exit status. A genuine script error or an early `quit()` still fails the step as before.
+- Data Readiness: the "Auxiliary Covariate Summary" table now reports the mean, standard error, number of domains and correlation with the target indicator for each analysis year separately, followed by an "All years" row that pools every domain-year observation (the former single-row figure). Within-year correlations describe cross-domain association at a point in time; the pooled row also reflects between-year movement. `outputs/tables/aux_covariate_summary.csv` gains a `year` column.
 - New dev-only test `tests/test_step_runner.R`.
 - No change to statistical calculations, MCPE defaults or the Pandoc handling introduced in wizard.5.4.
 

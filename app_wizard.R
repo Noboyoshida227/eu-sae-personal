@@ -1112,7 +1112,7 @@ ui <- fluidPage(
             h4("Missing Poverty Rates"),
             tableOutput("readiness_missing"),
             h4("Auxiliary Covariate Summary"),
-            p("Means, standard errors, observation counts, and correlations with the domain-level target indicator (poverty rate or mean welfare, matching the Indicator selector)."),
+            p("Means, standard errors, domain counts, and correlations with the domain-level target indicator (poverty rate or mean welfare, matching the Indicator selector), shown for each year separately and pooled over all years."),
             tableOutput("readiness_aux")
           ),
         

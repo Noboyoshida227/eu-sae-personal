@@ -264,6 +264,7 @@ empty_readiness_result <- function(messages = character(),
                                    cor_target_label = "Corr. w/ Poverty") {
   aux_summary <- data.frame(
     variable    = character(),
+    year        = character(),
     mean        = numeric(),
     se          = numeric(),
     n_obs       = integer(),
@@ -476,29 +477,45 @@ assess_data_readiness <- function(survey_data,
     aux_merged$poverty_rate <- NA_real_
   }
 
+  # One row per covariate and year (statistics across the domains observed in
+  # that year), followed by an "All years" row pooling every domain-year
+  # observation (the former single-row summary). Correlations within a year
+  # describe cross-domain association at a point in time; the pooled row also
+  # absorbs between-year movement, so the two can differ.
+  aux_years <- if ("year" %in% names(aux_merged)) {
+    yrs <- suppressWarnings(as.numeric(as.character(aux_merged$year)))
+    sort(unique(yrs[!is.na(yrs)]))
+  } else numeric()
+  year_labels <- c(as.character(aux_years), "All years")
   aux_summary <- data.frame(
-    variable    = aux_vars,
+    variable    = rep(aux_vars, each = length(year_labels)),
+    year        = rep(year_labels, times = length(aux_vars)),
     mean        = NA_real_,
     se          = NA_real_,
     n_obs       = NA_integer_,
     cor_poverty = NA_real_,
     stringsAsFactors = FALSE
   )
-  for (i in seq_along(aux_vars)) {
-    v   <- aux_vars[i]
-    x   <- aux_merged[[v]]
+  merged_year <- if (length(aux_years)) {
+    suppressWarnings(as.numeric(as.character(aux_merged$year)))
+  } else rep(NA_real_, nrow(aux_merged))
+  for (i in seq_len(nrow(aux_summary))) {
+    v   <- aux_summary$variable[i]
+    yl  <- aux_summary$year[i]
+    rows <- if (identical(yl, "All years")) rep(TRUE, nrow(aux_merged)) else
+      !is.na(merged_year) & merged_year == as.numeric(yl)
+    x   <- aux_merged[[v]][rows]
+    y   <- aux_merged$poverty_rate[rows]
     ok  <- !is.na(x)
     n   <- sum(ok)
     aux_summary$n_obs[i] <- n
     if (n > 0) {
       aux_summary$mean[i] <- round(mean(x[ok]), 6)
-      aux_summary$se[i]   <- round(sd(x[ok]) / sqrt(n), 6)
+      aux_summary$se[i]   <- if (n > 1) round(stats::sd(x[ok]) / sqrt(n), 6) else NA_real_
     }
-    if (n > 2 && sum(!is.na(aux_merged$poverty_rate[ok])) > 2) {
-      aux_summary$cor_poverty[i] <- round(
-        stats::cor(x[ok], aux_merged$poverty_rate[ok], use = "complete.obs"),
-        4
-      )
+    both <- ok & !is.na(y)
+    if (sum(both) > 2 && stats::sd(x[both]) > 0 && stats::sd(y[both]) > 0) {
+      aux_summary$cor_poverty[i] <- round(stats::cor(x[both], y[both]), 4)
     }
   }
 
@@ -509,8 +526,8 @@ assess_data_readiness <- function(survey_data,
   attr(aux_summary, "cor_target_label") <- cor_target_label
 
   msgs <- c(msgs, sprintf(
-    "Test 1: Auxiliary covariate summary computed for %d variables across %d domain-year observations (correlation against %s).",
-    length(aux_vars), nrow(aux_data), fgt_noun
+    "Test 1: Auxiliary covariate summary computed for %d variables, separately for %d year(s) and pooled across %d domain-year observations (correlation against %s).",
+    length(aux_vars), length(aux_years), nrow(aux_data), fgt_noun
   ))
 
   # ------------------------------------------------------------------

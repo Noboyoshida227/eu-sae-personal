@@ -1294,7 +1294,7 @@ ui <- fluidPage(
           h4("Missing Poverty Rates"),
           tableOutput("readiness_missing"),
           h4("Auxiliary Covariate Summary"),
-          p("Means, standard errors, observation counts, and correlations with the domain-level target indicator (poverty rate or mean welfare, matching the Indicator selector)."),
+          p("Means, standard errors, domain counts, and correlations with the domain-level target indicator (poverty rate or mean welfare, matching the Indicator selector), shown for each year separately and pooled over all years."),
           tableOutput("readiness_aux")
         ),
 
@@ -2411,7 +2411,11 @@ server <- function(input, output, session) {
     if (is.null(rr)) return(NULL)
     df <- rr$aux_summary
     cor_label <- attr(df, "cor_target_label") %||% "Corr. w/ Poverty"
-    names(df) <- c("Variable", "Mean", "Std. Error", "N", cor_label)
+    if (!"year" %in% names(df)) df$year <- "All years"
+    df <- df[, c("variable", "year", "mean", "se", "n_obs", "cor_poverty")]
+    # Show the variable name once per block so the per-year rows read as a group.
+    df$variable <- ifelse(duplicated(df$variable), "", df$variable)
+    names(df) <- c("Variable", "Year", "Mean", "Std. Error", "N (domains)", cor_label)
     df
   }, striped = TRUE, digits = 4)
 
